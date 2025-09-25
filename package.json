@@ -1,0 +1,46 @@
+{
+  "name": "fe_chatapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@tanstack/react-query": "^4.36.1",
+    "@types/js-cookie": "^3.0.6",
+    "axios": "^1.9.0",
+    "bcryptjs": "^3.0.2",
+    "crypto-js": "^4.2.0",
+    "fe_chatapp": "file:",
+    "i18next": "^25.3.2",
+    "js-cookie": "^3.0.5",
+    "lottie-react": "^2.4.1",
+    "lucide-react": "^0.523.0",
+    "next": "14.2.28",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.56.2",
+    "react-i18next": "^15.6.1",
+    "react-icons": "^5.5.0",
+    "react-toastify": "^11.0.5",
+    "socket.io-client": "^4.8.1",
+    "tailwind-scrollbar": "^3.1.0",
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "electron": "^37.3.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.28",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

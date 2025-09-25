@@ -1,0 +1,129 @@
+{
+  "secure_chat_title": "Tin nhắn mã hoá ChatAs an toàn",
+  "secure_chat_desc": "Tất cả tin nhắn của bạn được mã hoá đầu-cuối...",
+  "full_security": "Bảo mật toàn diện",
+  "no_server_storage": "Không lưu trữ trên máy chủ",
+  "choose_chat_prompt": "Chọn một cuộc trò chuyện hoặc tạo nhóm để bắt đầu.",
+
+  "theme_settings_title": "Cài đặt giao diện",
+  "light_mode": "Sáng",
+  "dark_mode": "Tối",
+  "system_mode": "Hệ thống",
+  "chat_background_title": "Hình nền chat",
+  "use_avatar_background": "Sử dụng avatar làm hình nền",
+
+  "security_settings_title": "Hoạt động",
+  "show_online_status": "Hiển thị trạng thái truy cập",
+
+  "notification_settings_title": "Cài đặt thông báo",
+  "notification_settings_desc": "Nhận được thông báo mỗi khi có tin nhắn mới",
+  "turn_on": "Bật",
+  "turn_off": "Tắt",
+  "sound_and_notifications": "Âm thanh và thông báo",
+  "play_sound_on_new_message": "Phát âm thanh khi có tin nhắn & thông báo mới",
+
+  "message_settings_title": "Hiển thị & gửi tin nhắn",
+  "double_click_to_reply": "Bấm đúp vào vùng cạnh tin nhắn để trả lời",
+  "show_typing_status": "Bạn sẽ thấy bạn bè đang soạn tin nhắn",
+
+  "language_settings": "Ngôn ngữ",
+  "change_language": "Thay đổi ngôn ngữ",
+  "lang_vi": "Tiếng Việt",
+  "lang_en": "Tiếng Anh",
+
+  "account_settings": "Thông tin cá nhân",
+  "customer_id": "Mã khách hàng",
+  "copy": "Sao chép",
+  "copied": "Đã sao chép",
+  "customer_name": "Tên khách hàng",
+  "email": "Email",
+  "update": "Cập nhật",
+  "copy_success": "Đã copy mã người dùng!",
+  "copy_fail": "Không thể copy.",
+  "update_success": "Cập nhật thành công",
+  "update_fail": "Cập nhật thất bại",
+  "upload_success": "Upload ảnh thành công",
+  "upload_fail": "Upload ảnh thất bại",
+  "default_decrypt_time": "Thời gian giải mã mặc định (giây)",
+  "decrypt_time_hint": "Giá trị này sẽ áp dụng cho tất cả tin nhắn mã hóa",
+  "cancel": "Hủy",
+  "save": "Lưu",
+  "saving": "Đang lưu...",
+  "save_success": "Lưu thành công!",
+  "save_failed": "Lưu thất bại!",
+
+  "settings": {
+    "title": "Cài đặt",
+    "general": "Cài đặt chung",
+    "account": "Tài khoản",
+    "back": "Quay lại",
+    "security": "Quyền riêng tư",
+    "theme": "Giao diện",
+    "notification": "Thông báo",
+    "message": "Tin nhắn"
+  },
+  "serverData": "Dữ liệu trong máy chủ",
+
+  "notiDeleteUser": "Bạn đã xoá tin nhắn thành công",
+  "addGruopChat": "Tạo nhóm chat thành công!",
+  "copyId": "Đã copy mã người dùng!",
+  "copyIdFail": "Không thể copy",
+
+  "chat": {
+    "delete_title": "Xoá đoạn chat",
+    "delete_confirm": "Bạn có chắc muốn xoá đoạn chat \"{{name}}\" không?"
+  },
+
+  "group": {
+    "title": "Tạo Nhóm Chat",
+    "search_placeholder": "Tìm người dùng qua email hoặc ID",
+    "name_placeholder": "Nhập tên nhóm chat",
+    "key_placeholder": "Nhập key để mã hoá",
+    "create_button": "Tạo nhóm chat"
+  },
+
+  "keyModal": {
+    "title": "Nhập mã bí mật để bắt đầu chat",
+    "placeholder": "Nhập key để mã hoá",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận"
+  },
+
+  "searchBox": {
+    "placeholder": "Tìm kiếm theo ID hoặc Email"
+  },
+  "searchResults": {
+    "groupLabel": "Nhóm chat"
+  },
+  "userHeader": {
+    "chatAs": "ChatAs - {{name}}",
+    "idLabel": "ID:",
+    "copyHint": "Bấm để copy"
+  },
+  "chatBox": {
+    "empty": "Hãy thêm hoặc chọn 1 tin nhắn để liên hệ",
+    "noName": "Không có tên cuộc trò chuyện",
+    "members": "{{count}} thành viên",
+    "enterKey": "Nhập key mã hoá",
+    "decryptAll": "Giải mã tất cả",
+    "decrypt": "Giải mã",
+    "reEncrypt": "Mã hóa lại",
+    "reply": "Trả lời:",
+    "replyMessage": "Trả lời tin nhắn",
+    "deleteMessage": "Xoá tin nhắn",
+    "deleteMessageSuccess": "1 tin nhắn đã được xoá",
+    "replying": "💬 Đang trả lời:",
+    "cancelReply": "Hủy trả lời",
+    "attachment": "Tệp đính kèm",
+    "placeholder": "Nhập tin nhắn...",
+    "errorFetchUser": "Lỗi khi lấy thông tin người dùng:",
+    "errorDeleteMessage": "Không thể xoá tin nhắn.",
+    "errorUpload": "Lỗi khi upload file",
+    "successUpload": "Gửi file thành công",
+    "deletedMessage": "1 tin nhắn đã được xoá",
+    "noKey": "Bạn chưa nhập key.",
+    "wrongKey": "Key không chính xác!",
+    "noSelection": "Bạn chưa chọn tin nhắn hoặc bật giải mã tất cả"
+  }
+}
+

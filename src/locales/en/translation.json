@@ -1,0 +1,133 @@
+{
+  "secure_chat_title": "Secure ChatAs Encrypted Messages",
+  "secure_chat_desc": "All your messages are end-to-end encrypted...",
+  "full_security": "Full Security",
+  "no_server_storage": "No server storage",
+  "choose_chat_prompt": "Choose a conversation or create a group to start.",
+
+  "theme_settings_title": "Interface Settings",
+  "light_mode": "Light",
+  "dark_mode": "Dark",
+  "system_mode": "System",
+  "chat_background_title": "Chat Background",
+  "use_avatar_background": "Use avatar as background",
+
+  "security_settings_title": "Activity",
+  "show_online_status": "Show online status",
+
+  "notification_settings_title": "Notification Settings",
+  "notification_settings_desc": "Receive notifications whenever there is a new message",
+  "turn_on": "On",
+  "turn_off": "Off",
+  "sound_and_notifications": "Sound and Notifications",
+  "play_sound_on_new_message": "Play sound when there is a new message & notification",
+
+  "message_settings_title": "Display & Send Messages",
+  "double_click_to_reply": "Double-click on the side of the message to reply",
+  "show_typing_status": "You will see friends typing a message",
+
+  "language_settings": "Language",
+  "change_language": "Change language",
+  "lang_vi": "Vietnamese",
+  "lang_en": "English",
+
+  "account_settings": "Personal Information",
+  "customer_id": "Customer ID",
+  "copy": "Copy",
+  "copied": "Copied",
+  "customer_name": "Customer Name",
+  "email": "Email",
+  "cancel": "Cancel",
+  "update": "Update",
+  "copy_success": "Copied user ID!",
+  "copy_fail": "Unable to copy.",
+  "update_success": "Update successful",
+  "update_fail": "Update failed",
+  "upload_success": "Image uploaded successfully",
+  "upload_fail": "Image upload failed",
+  "default_decrypt_time": "Default Decrypt Time (seconds)",
+  "decrypt_time_hint": "This value will be applied for all encrypted messages",
+  "save": "Save",
+  "saving": "Saving...",
+  "save_success": "Saved successfully!",
+  "save_failed": "Failed to save!",
+
+  "settings": {
+    "title": "Settings",
+    "general": "General Settings",
+    "back": "Back",
+    "account": "Account",
+    "security": "privacy",
+    "theme": "Theme",
+    "notification": "Notification",
+    "message": "Messages"
+  },
+
+  "serverData": "Server Data",
+
+  "notiDeleteUser": "You have successfully deleted the message",
+  "addGruopChat": "Chat group created successfully!",
+  "copyId": "User code copied!",
+  "copyIdFail": "Failed to copy",
+
+  "chat": {
+    "delete_title": "Delete chat",
+    "delete_confirm": "Are you sure you want to delete the chat \"{{name}}\"?"
+  },
+
+  "group": {
+    "title": "Create Group Chat",
+    "search_placeholder": "Search users by email or ID",
+    "name_placeholder": "Enter group chat name",
+    "key_placeholder": "Enter encryption key",
+    "create_button": "Create group chat"
+  },
+
+  "keyModal": {
+    "title": "Enter the secret key to start chatting",
+    "placeholder": "Enter encryption key",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+
+  "searchBox": {
+    "placeholder": "Search by ID or Email"
+  },
+
+  "searchResults": {
+    "groupLabel": "Group chat"
+  },
+
+  "userHeader": {
+    "chatAs": "ChatAs - {{name}}",
+    "idLabel": "ID:",
+    "copyHint": "Click to copy"
+  },
+
+  "chatBox": {
+    "empty": "Please add or select a message to start chatting",
+    "noName": "No conversation name",
+    "members": "{{count}} members",
+    "enterKey": "Enter encryption key",
+    "decryptAll": "Decrypt all",
+    "decrypt": "Decrypt",
+    "reEncrypt": "Re-encrypt",
+    "reply": "Reply:",
+    "replyMessage": "Reply to message",
+    "deleteMessage": "Delete message",
+    "deleteMessageSuccess": "1 message has been deleted",
+    "replying": "💬 Replying:",
+    "cancelReply": "Cancel reply",
+    "attachment": "Attachment",
+    "placeholder": "Type a message...",
+    "errorFetchUser": "Error fetching user information:",
+    "errorDeleteMessage": "Unable to delete message.",
+    "errorUpload": "Error while uploading file",
+    "successUpload": "File uploaded successfully",
+    "deletedMessage": "1 message has been deleted",
+    "noKey": "You haven't entered the key.",
+    "wrongKey": "Incorrect key!",
+    "noSelection": "You haven't selected a message or enabled decrypt all"
+  }
+  
+}
