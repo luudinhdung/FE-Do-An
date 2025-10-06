@@ -46,7 +46,6 @@ interface Message {
 }
 const socket = io("http://localhost:3002/messages");
 
-
 function getPreviewText(msg: Message): string {
   if (!msg.encrypted || !msg.encrypted.data) {
     return msg.content ?? "";
@@ -95,9 +94,9 @@ function Chat({
   const [globalDecrypting, setGlobalDecrypting] = useState(false);
   const [isDecryptAll, setIsDecryptAll] = useState(false);
   const [messageCountdowns, setMessageCountdowns] = useState<
-  Record<string, number>
->({});
-const [userCountdown, setUserCountdown] = useState<number | null>(null);
+    Record<string, number>
+  >({});
+  const [userCountdown, setUserCountdown] = useState<number | null>(null);
 
   const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || "fallback-key";
   axios.defaults.withCredentials = true;
@@ -107,8 +106,6 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
     : null;
   const { t } = useTranslation();
 
-
-
   // Xử lý thời gian
   useEffect(() => {
     const timer = setInterval(() => {
@@ -116,15 +113,15 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
       setMessageCountdowns((prev) => {
         if (!prev || Object.keys(prev).length === 0) return prev;
         const next: Record<string, number> = { ...prev };
-  
+
         Object.entries(prev).forEach(([mid, value]) => {
           const v = typeof value === "number" ? value : Number(value);
           if (isNaN(v)) return;
-  
+
           if (v <= 1) {
             // remove countdown for this message
             delete next[mid];
-  
+
             // also re-encrypt that message in messages list (safe)
             setMessages((msgs) =>
               msgs.map((m) => {
@@ -142,10 +139,10 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
             next[mid] = v - 1;
           }
         });
-  
+
         return next;
       });
-  
+
       // 2) global countdown
       setGlobalCountdown((prev) => {
         if (typeof prev === "number") {
@@ -154,7 +151,7 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
             setGlobalDecrypting(false);
             setIsDecryptAll(false);
             setMessageCountdowns({});
-  
+
             setMessages((msgs) =>
               msgs.map((m) =>
                 m.decrypted
@@ -166,7 +163,7 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
                   : m
               )
             );
-  
+
             return null;
           }
           return prev - 1;
@@ -174,10 +171,9 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
         return prev;
       });
     }, 1000);
-  
+
     return () => clearInterval(timer);
   }, []);
-  
 
   // Lấy thông tin người dùng hien tai
   useEffect(() => {
@@ -233,13 +229,26 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
       const sendEncrypted = async (
         filePath: string,
         originalName: string,
-        type: "IMAGE" | "FILE"
+        type: "IMAGE" | "FILE",
+        rawFile: File
       ) => {
         const encrypted = await encryptMessage(
           JSON.stringify({ url: filePath, name: originalName })
         );
-        console.log(filePath, originalName, type, encrypted);
-
+      
+        const fileInfo = {
+          url: filePath,
+          name: originalName,
+          size: rawFile.size,
+          type: rawFile.type,
+        };
+      
+        console.log("Emit file message:", {
+          previewUrl: filePath,
+          attachments: [fileInfo],
+        });
+      
+        // 👇 Gửi qua socket
         socket.emit("send_message", {
           chatId,
           senderId: currentUserId,
@@ -247,26 +256,44 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
           content: encrypted,
           type,
           repliedMessageId: repliedMessage?.messageId ?? null,
+          previewUrl: filePath,
+          attachments: [fileInfo],
         });
+    
       };
+      
+
+      
 
       if (!Array.isArray(uploaded.files)) {
         const fileUrl = uploaded.filePath;
-        const fileName = uploaded.originalName; // ✅ tên gốc từ backend
+        const fileName = uploaded.originalName;
         const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
-        await sendEncrypted(fileUrl, fileName, isImage ? "IMAGE" : "FILE");
+        await sendEncrypted(
+          fileUrl,
+          fileName,
+          isImage ? "IMAGE" : "FILE",
+          files[0]
+        );
       } else {
-        for (const file of uploaded.files) {
+        for (let i = 0; i < uploaded.files.length; i++) {
+          const file = uploaded.files[i];
+          const rawFile = files[i];
           const fileUrl = file.filePath;
-          const fileName = file.originalName; // ✅ tên gốc
+          const fileName = file.originalName;
           const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
-          await sendEncrypted(fileUrl, fileName, isImage ? "IMAGE" : "FILE");
+          await sendEncrypted(
+            fileUrl,
+            fileName,
+            isImage ? "IMAGE" : "FILE",
+            rawFile
+          );
         }
       }
 
       toast.success(t("chat.successUpload"));
     } catch (err) {
-      toast.success(t("chat.errorUpload"));
+      toast.error(t("chat.errorUpload"));
       console.error(err);
     }
 
@@ -380,7 +407,7 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
           `http://localhost:3002/messages/chat/${chatId}`
         );
         const encryptedMessages = res.data;
-
+        console.log("Fetched messages:", encryptedMessages);
         const transformed = encryptedMessages.map((msg: any) => {
           const encryptedContent =
             typeof msg.content === "string"
@@ -399,6 +426,9 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
             avatar: msg.sender?.avatar || null,
             encrypted: encryptedContent,
             decrypted: false,
+            fileUrl: null,
+            previewUrl: msg.previewUrl || null,
+            attachments: msg.attachments || [],
             repliedMessageId: msg.repliedMessageId || null,
             type: msg.type,
             reactions: msg.reactions || [],
@@ -490,6 +520,7 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
       isEncrypted: true,
       content: encrypted,
       repliedMessageId: repliedMessage?.messageId ?? null,
+      type: "TEXT",
     });
     setChatGroups((prevGroups) => {
       const updated = prevGroups.map((group) =>
@@ -579,8 +610,7 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
       setMessages(updatedMessages);
       setIsDecryptAll(true);
       setGlobalDecrypting(true);
-      setMessageCountdowns({}); 
-      console.log(0);
+      setMessageCountdowns({});
       setGlobalCountdown(userCountdown || 0);
       setUserInputKey("");
       return;
@@ -599,7 +629,7 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
             content: parsed.url,
             fileName: parsed.name,
             decrypted: true,
-            countdown: 10,
+            fileUrl: parsed.url,
           };
           setMessages(updated);
         } catch {
@@ -611,7 +641,7 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
           ...msg,
           content: decrypted,
           decrypted: true,
-          countdown: 10,
+          fileUrl: msg.url,
         };
         setMessages(updated);
       } else {
@@ -620,34 +650,30 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
           ...msg,
           content: decrypted,
           decrypted: true,
-          countdown: 10,
+          fileUrl: msg.url,
         };
         setMessages(updated);
-      setSelectedMessageIndex(null);
-      setUserInputKey("");
-      setGlobalCountdown(userCountdown); // ✅
-      const mid = updated[selectedMessageIndex].messageId;
-      if (mid) {
-        setMessageCountdowns((prev) => ({
-          ...prev,
-          [mid]: userCountdown ?? 30,
-        }));
+        setSelectedMessageIndex(null);
+        setUserInputKey("");
+        setGlobalCountdown(userCountdown); // ✅
+        const mid = updated[selectedMessageIndex].messageId;
+        if (mid) {
+          setMessageCountdowns((prev) => ({
+            ...prev,
+            [mid]: userCountdown ?? 30,
+          }));
+        }
+        setSelectedMessageIndex(null);
+        setUserInputKey("");
       }
-      setSelectedMessageIndex(null);
-      setUserInputKey("");
-    
-      }
-
-      
     }
   };
-
 
   const handleDecryptMessage = (messageId: string) => {
     if (isDecryptAll) return; // bỏ qua nếu đang decrypt all
 
     const countdown = userCountdown ?? 0;
-    setMessageCountdowns((prev) => ({ ...prev,[messageId]: countdown }));
+    setMessageCountdowns((prev) => ({ ...prev, [messageId]: countdown }));
 
     const timer = setInterval(() => {
       setMessageCountdowns((prev) => {
@@ -684,8 +710,6 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
       });
     }, 1000);
   };
-
-
 
   const handleToggleDecryptAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
@@ -953,6 +977,12 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
           const isCurrentUser = msg.sender === currentUserName;
           const nameFriend = !isCurrentUser ? msg.sender : "";
           const type = msg.type;
+          console.log("IMAGE message:", {
+            id: msg.id,
+            previewUrl: msg.previewUrl,
+            fileUrl: msg.fileUrl,
+            decrypted: msg.decrypted,
+          });
 
           const repliedMsg = msg.repliedMessageId
             ? messages.find((m) => m.messageId === msg.repliedMessageId)
@@ -978,23 +1008,21 @@ const [userCountdown, setUserCountdown] = useState<number | null>(null);
               )}
 
               <div className="flex flex-col max-w-[85%] md:max-w-[75%] relative group">
-              {repliedMsg && repliedMsg.content && (
-  <div
-    className={`text-xs mb-1 px-2 py-1 rounded-t-lg w-fit max-w-full ${
-      isCurrentUser
-        ? "bg-[#D1FFE7] text-[#00664D] ml-auto"
-        : "bg-[#DFFFEF] dark:bg-[#0F2218] text-[#005A3C] dark:text-[#1AFF1A]"
-    }`}
-  >
-    <span className="font-medium">Trả lời:</span>{" "}
-    <span className="truncate">
-      {repliedMsg.content.substring(0, 50)}
-      {repliedMsg.content.length > 50 ? "..." : ""}
-    </span>
-  </div>
-)}
-
-
+                {repliedMsg && repliedMsg.content && (
+                  <div
+                    className={`text-xs mb-1 px-2 py-1 rounded-t-lg w-fit max-w-full ${
+                      isCurrentUser
+                        ? "bg-[#D1FFE7] text-[#00664D] ml-auto"
+                        : "bg-[#DFFFEF] dark:bg-[#0F2218] text-[#005A3C] dark:text-[#1AFF1A]"
+                    }`}
+                  >
+                    <span className="font-medium">Trả lời:</span>{" "}
+                    <span className="truncate">
+                      {repliedMsg.content.substring(0, 50)}
+                      {repliedMsg.content.length > 50 ? "..." : ""}
+                    </span>
+                  </div>
+                )}
 
                 <div
                   className={`flex ${
@@ -1036,15 +1064,36 @@ max-w-[min(90vw,800px)]
                       </div>
 
                       <div className="whitespace-pre-wrap break-all leading-[22px]">
-                        {msg.type === "IMAGE" && msg.decrypted ? (
-                          <img
-                            src={msg.content}
-                            alt={msg.fileName || "uploaded"}
-                            className="max-w-xs max-h-64 rounded-lg border border-gray-300"
-                          />
+                        {msg.type === "IMAGE" ? (
+                          <div className="relative">
+                            <img
+                              src={msg.previewUrl || msg.content}
+                              alt={msg.fileName || "encrypted image"}
+                              className={`max-w-xs max-h-64 rounded-lg border transition-all duration-300 ${
+                                msg.decrypted
+                                  ? "blur-0 opacity-250"
+                                  : "blur-md opacity-100"
+                              }`}
+                              onClick={() => {
+                                if (msg.decrypted) {
+                                  window.open(
+                                    msg.fileUrl ||
+                                      msg.previewUrl ||
+                                      msg.content,
+                                    "_blank"
+                                  );
+                                }
+                              }}
+                            />
+                           
+                          </div>
                         ) : msg.type === "FILE" && msg.decrypted ? (
                           <a
-                            href={msg.content}
+                            href={
+                              msg.fileUrl ||
+                              msg.attachments?.[0]?.url ||
+                              msg.content
+                            }
                             target="_blank"
                             download={msg.fileName}
                             rel="noopener noreferrer"
@@ -1252,7 +1301,7 @@ max-w-[min(90vw,800px)]
           );
         })}
 
-{globalDecrypting && (
+        {globalDecrypting && (
           <div className="fixed bottom-[80px] right-96 z-30 flex items-center gap-2 dark:bg-black bg-[#7c7c7c] text-white dark:text-black px-3 py-2 rounded-full shadow-lg hover:scale-105 transition-all duration-200">
             <Clock className="w-4 h-4" />
             <span>{globalCountdown}s</span>

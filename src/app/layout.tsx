@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-inter antialiased`}>
+      <body suppressHydrationWarning className={`${inter.variable} font-inter antialiased`}>
         <ReactQueryProvider>
           <AppProvider>{children}</AppProvider>
         </ReactQueryProvider>

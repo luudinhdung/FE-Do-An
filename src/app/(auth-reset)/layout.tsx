@@ -21,13 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} font-poppins !important`}>
-      <body className={`${poppins.variable} font-poppins !important antialiased bg-[#F4F4F4]`}>
+      <body suppressHydrationWarning className={`${poppins.variable} font-poppins !important antialiased bg-[#F4F4F4]`}>
         <ReactQueryProvider>
           {children}
           <ToastContainer position="top-right" autoClose={2000} />
         </ReactQueryProvider>
       </body>
-    </html>
   );
 }

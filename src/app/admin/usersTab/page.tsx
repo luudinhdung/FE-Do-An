@@ -36,6 +36,9 @@ export default function UsersTab() {
     }
   };
 
+  console.log(users,"users");
+  
+
   return (
     <div className="bg-white shadow rounded-lg p-4">
       <h2 className="text-xl font-semibold mb-4">Danh sách User</h2>
@@ -52,7 +55,7 @@ export default function UsersTab() {
                 <th className="p-2 border">Tên</th>
                 <th className="p-2 border">Email</th>
                 <th className="p-2 border">Role</th>
-                <th className="p-2 border">Số dư (credits)</th> {/* 👈 thêm cột */}
+                <th className="p-2 border">Số dư (credits)</th>
                 <th className="p-2 border">Avatar</th>
               </tr>
             </thead>
@@ -64,7 +67,7 @@ export default function UsersTab() {
                   <td className="p-2 border">{user.email}</td>
                   <td className="p-2 border">{user.role}</td>
                   <td className="p-2 border text-blue-600 font-semibold">
-                    {user.balance} ₫
+                    {user?.balance} ₫
                   </td>
                   <td className="p-2 border">
                     <img

@@ -37,9 +37,11 @@ export default function PricingRuleManager() {
         cost: rule.cost,
         isActive: rule.isActive,
       });
-      await fetchRules(); // load lại sau khi update
-    } catch (err) {
+      await fetchRules();
+      alert(`${rule.type} cập nhật thành công!`);
+    } catch (err: any) {
       console.error("Lỗi update:", err);
+      alert(err.response?.data?.message || "Lỗi update pricing rule");
     }
   };
 

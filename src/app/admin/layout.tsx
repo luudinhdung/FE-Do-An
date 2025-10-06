@@ -1,3 +1,5 @@
+"use client";
+
 import AuthGuard from "../(auth)/AuthGuard";
 
 // AdminLayout của bạn vẫn giữ nguyên

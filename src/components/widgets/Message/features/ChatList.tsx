@@ -64,7 +64,6 @@ export const ChatList = ({
 
           // ✅ Lấy unread count từ props thay vì từ group
           const unreadCount = unreadCounts[group.id] || 0;
-          console.log(unreadCount, "unreadCounts");
           
           return (
             <div
