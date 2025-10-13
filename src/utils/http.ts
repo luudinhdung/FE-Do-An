@@ -1,8 +1,9 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3002", // tùy theo backend của bạn
+  baseURL: API_URL,
   withCredentials: true,
 });
 

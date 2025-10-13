@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import io from "socket.io-client";
 import FeedbackButton from "../Feedback/FeedbackButton";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
-const socket = io("http://localhost:3002/messages");
+const socket = io(`${API_URL}/messages`);
 
 function RenderData({ chatId }: { chatId: string }) {
   const [dataArray, setDataArray] = useState<
@@ -25,7 +26,7 @@ function RenderData({ chatId }: { chatId: string }) {
     const fetchMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3002/messages/chat/${chatId}`
+          `${API_URL}/messages/chat/${chatId}`
         );
         const extracted = res.data.map((msg: any) => ({
           id: msg.id,

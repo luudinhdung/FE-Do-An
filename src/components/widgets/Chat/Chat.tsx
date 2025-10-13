@@ -19,7 +19,6 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import io from "socket.io-client";
-
 interface MessageProps {
   chatId: string;
   chatKey: string;
@@ -28,6 +27,7 @@ interface MessageProps {
   setChatGroups: React.Dispatch<React.SetStateAction<ChatGroup[]>>;
   participants: { user: { id: string; name: string; avatar: string } }[];
 }
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
 interface Message {
   [x: string]: any;
@@ -44,7 +44,7 @@ interface Message {
   fileName?: string;
   reactions?: { userId: string; emoji: string }[];
 }
-const socket = io("http://localhost:3002/messages");
+const socket = io(`${API_URL}/messages`);
 
 function getPreviewText(msg: Message): string {
   if (!msg.encrypted || !msg.encrypted.data) {
@@ -179,7 +179,7 @@ function Chat({
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const res = await axios.get("http://localhost:3002/users/current");
+        const res = await axios.get(`${API_URL}/users/current`);
         const user = res.data.user;
         if (user) {
           setCurrentUserName(user.name);
@@ -197,7 +197,7 @@ function Chat({
   // Xử lý xoá message
   const handleDeleteMessage = async (messageId: string) => {
     try {
-      await axios.delete("http://localhost:3002/messages/delete", {
+      await axios.delete(`${API_URL}/messages/delete`, {
         data: { messageId },
       });
       setMessages((prev) => prev.filter((msg) => msg.messageId !== messageId));
@@ -219,7 +219,7 @@ function Chat({
 
     try {
       const res = await axios.post(
-        "http://localhost:3002/messages/upload",
+        `${API_URL}/messages/upload`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -404,7 +404,7 @@ function Chat({
     const fetchMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3002/messages/chat/${chatId}`
+          `${API_URL}/messages/chat/${chatId}`
         );
         const encryptedMessages = res.data;
         console.log("Fetched messages:", encryptedMessages);
@@ -857,7 +857,7 @@ function Chat({
 
   useEffect(() => {
     axios
-      .get("http://localhost:3002/users/current", { withCredentials: true })
+      .get(`${API_URL}/users/current`, { withCredentials: true })
       .then((res) => {
         console.log("DefaultCountdown từ API:", res.data.user.defaultCountdown);
         setUserCountdown(res.data.user.defaultCountdown ?? 30);

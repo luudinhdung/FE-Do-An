@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "App Chat As",
 };
 
-export const inter = Inter({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",

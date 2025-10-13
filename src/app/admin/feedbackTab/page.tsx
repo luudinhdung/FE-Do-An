@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState, useCallback } from "react";
 
 interface Feedback {
@@ -16,11 +17,12 @@ export default function FeedbackTab() {
   const [loading, setLoading] = useState(true);
   const [selectedFeedbackIndex, setSelectedFeedbackIndex] = useState<number | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const res = await fetch("http://localhost:3002/feedback");
+        const res = await fetch(`${API_URL}/feedback`);
         const data = await res.json();
         if (data.success) {
           setFeedbacks(data.data);
@@ -101,7 +103,7 @@ export default function FeedbackTab() {
                       {fb.screenshots && fb.screenshots.length > 0 ? (
                         <div className="flex gap-2 flex-wrap items-center">
                           <img
-                            src={`http://localhost:3002/uploads/feedback/${fb.screenshots[0]}`}
+                            src={`${API_URL}/uploads/feedback/${fb.screenshots[0]}`}
                             alt="screenshot"
                             className="h-16 w-auto rounded cursor-pointer hover:opacity-80"
                             onClick={() => {
@@ -145,7 +147,7 @@ export default function FeedbackTab() {
             </button>
 
             <img
-              src={`http://localhost:3002/uploads/feedback/${
+              src={`${API_URL}/uploads/feedback/${
                 feedbacks[selectedFeedbackIndex].screenshots![selectedImageIndex]
               }`}
               alt="Xem ảnh"

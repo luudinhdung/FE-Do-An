@@ -3,8 +3,9 @@
 import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
-const socket = io("http://localhost:3002");
+const socket = io(API_URL);
 
 interface Feedback {
   id: string;
@@ -20,7 +21,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     // Load feedbacks ban đầu
-    fetch("http://localhost:3002/feedback")
+    fetch(`${API_URL}/feedback`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setNotifications(data.data);
@@ -37,7 +38,7 @@ export default function NotificationBell() {
   }, []);
 
   const markAsRead = async (id: string) => {
-    await fetch(`http://localhost:3002/feedback/${id}/read`, {
+    await fetch(`${API_URL}/feedback/${id}/read`, {
       method: "PATCH",
     });
     setNotifications((prev) =>

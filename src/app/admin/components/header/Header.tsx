@@ -1,3 +1,4 @@
+"use client";
 import { useContext, useState } from "react";
 import NotificationBell from "../notificationBell/NotificationBell";
 import {

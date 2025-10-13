@@ -17,6 +17,7 @@ import { KeyInputModal } from "./features/KeyInputModal";
 import { SearchBox } from "./features/SearchBox";
 import { SearchResults } from "./features/SearchResults";
 import { UserHeader } from "./features/UserHeader";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
 interface ChatGroup {
   id: string;
@@ -49,7 +50,7 @@ interface MessageProps {
   setChatGroups: React.Dispatch<React.SetStateAction<ChatGroup[]>>;
 }
 
-const socket = io("http://localhost:3002/messages");
+const socket = io(`${API_URL}/messages`);
 
 interface CreateChatDto {
   userA: string;
@@ -129,7 +130,7 @@ function Message({
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const res = await axios.get("http://localhost:3002/users/current", {
+        const res = await axios.get(`${API_URL}/users/current`, {
           withCredentials: true,
         });
         const user = res.data.user;
@@ -143,13 +144,13 @@ function Message({
   // Lấy danh sách nhóm chat của người dùng
   const fetchMyGroups = async () => {
     try {
-      const resUser = await axios.get("http://localhost:3002/users/current", {
+      const resUser = await axios.get(`${API_URL}/users/current`, {
         withCredentials: true,
       });
       const currentUserId = resUser.data.user.id;
       setCurrentUser(resUser.data.user);
 
-      const res = await axios.get("http://localhost:3002/chats/my-groups", {
+      const res = await axios.get(`${API_URL}/chats/my-groups`, {
         withCredentials: true,
       });
 
@@ -232,7 +233,7 @@ function Message({
 
     try {
       const res = await axios.get(
-        `http://localhost:3002/users/search?query=${value}`,
+        `${API_URL}/users/search?query=${value}`,
         {
           withCredentials: true,
         }
@@ -268,7 +269,7 @@ function Message({
       };
 
       const res = await axios.post(
-        "http://localhost:3002/chats/create/group",
+        `${API_URL}/chats/create/group`,
         body,
         {
           withCredentials: true,
@@ -322,7 +323,7 @@ function Message({
       };
 
       const res = await axios.post(
-        "http://localhost:3002/chats/one-to-one",
+        `${API_URL}/chats/one-to-one`,
         dataToSend,
         {
           withCredentials: true,
@@ -342,7 +343,7 @@ function Message({
   // Xử lý xoá nhóm chat
   const deleteGroup = async (group: ChatGroup) => {
     try {
-      await axios.delete(`http://localhost:3002/chats/delete/${group.id}`, {
+      await axios.delete(`${API_URL}/chats/delete/${group.id}`, {
         withCredentials: true,
       });
 
@@ -491,7 +492,7 @@ function Message({
 
     try {
       const res = await axios.get(
-        `http://localhost:3002/users/search?email=${value}`,
+        `${API_URL}/users/search?email=${value}`,
         {
           withCredentials: true,
         }
@@ -508,7 +509,7 @@ function Message({
   const handleUserClick = async (user: User) => {
     try {
       const res = await axios.get(
-        `http://localhost:3002/chats/check-one-to-one/${user.id}`,
+        `${API_URL}/chats/check-one-to-one/${user.id}`,
         {
           withCredentials: true,
         }
@@ -609,7 +610,7 @@ function Message({
 
     try {
       const [resUsers] = await Promise.all([
-        axios.get(`http://localhost:3002/users/search?email=${term}`, {
+        axios.get(`${API_URL}/users/search?email=${term}`, {
           withCredentials: true,
         }),
       ]);
@@ -643,7 +644,7 @@ function Message({
 
     try {
       const res = await axios.get(
-        `http://localhost:3002/messages/unread/${currentUser.id}`,
+        `${API_URL}/messages/unread/${currentUser.id}`,
         { withCredentials: true }
       );
 

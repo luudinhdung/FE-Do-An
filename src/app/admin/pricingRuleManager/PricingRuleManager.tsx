@@ -12,7 +12,8 @@ export default function PricingRuleManager() {
   const [rules, setRules] = useState<PricingRule[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "http://localhost:3002";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+
 
   // Lấy danh sách rules
   const fetchRules = async () => {

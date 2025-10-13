@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 interface User {
   id: string;
   email: string;
@@ -24,7 +24,7 @@ export default function UsersTab() {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get("http://localhost:3002/users", {
+      const res = await axios.get(`${API_URL}/users`, {
         withCredentials: true,
       });
       setUsers(res.data);

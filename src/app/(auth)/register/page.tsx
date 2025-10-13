@@ -16,7 +16,7 @@ import animaRegister from "../../../../public/animation/animate-register.json";
 
 type FormData = SchemaRegister;
 
-function page() {
+function Page() {
   const [showPassword, setShowPassword] = useState(false);
   const [agree, setAgree] = useState(false);
   const navigate = useRouter();
@@ -32,7 +32,7 @@ function page() {
 
   const registerMutation = useMutation({
     mutationFn: (body: FormData) => {
-      return authApi.register(body);
+      return authApi.register(body as any);
     },
   });
 
@@ -192,4 +192,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

@@ -31,8 +31,6 @@ const initialAppContext: AppContextType = {
   isLoading: true,
   handleLogin: () => {},
   handleLogout: () => {},
-
-  
 };
 
 export const AppContext = createContext<AppContextType>(initialAppContext);
@@ -111,13 +109,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   
 
   const handleLogin = (accessToken: string) => {
+    console.log("Logging in...");
+    
     Cookies.set("access_token", accessToken, {
       expires: 7,
       secure: true,
       sameSite: "None",
     });
-
-    
     sessionStorage.setItem("access_token", accessToken);
     setIsAuthenticated(true);
     router.push("/");

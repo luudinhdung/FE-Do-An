@@ -1,29 +1,27 @@
 "use client";
 
-import authApi from "@/apis/auth.api";
-import InputAuth from "@/components/features/InputAuth/InputAuth";
 import { path } from "@/constants/path";
 import { AppContext } from "@/contexts/app.context";
 import { SchemaLogin, schemaLogin } from "@/utils/rules";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import animateLogin from "../../../../public/animation/animate-login.json";
 import dynamic from "next/dynamic";
+import InputAuth from "@/components/features/InputAuth/InputAuth";
+import animateLogin from "../../../../public/animation/animate-login.json";
+import axios from "axios";
 
-// Chỉ render Animate ở client
 const Animate = dynamic(() => import("@/components/icons/Animate/Animate"), {
   ssr: false,
 });
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 type FormData = SchemaLogin;
 
-function page() {
-  const { isAuthenticated, handleLogin } = useContext(AppContext);
+function Page() {
+  const { handleLogin } = useContext(AppContext);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
@@ -31,48 +29,67 @@ function page() {
     register,
     handleSubmit,
     formState: { errors },
-    setError,
-  } = useForm({
+  } = useForm<FormData>({
     resolver: yupResolver(schemaLogin),
   });
 
-  const loginMutation = useMutation({
-    mutationFn: (body: FormData) => {
-      return authApi.login(body);
-    },
-  });
-  const handleSubmitForm = handleSubmit((data) => {
-    loginMutation.mutate(data, {
-      onSuccess: (response) => {
-        handleLogin(response.data.accessToken);
-        toast.success("Đăng nhập thành công");
+  // ✅ Hàm xử lý login
+  const handleLoginClick = async (data: FormData, e?: React.BaseSyntheticEvent) => {
+    if (e) e.preventDefault(); // ⛔ Chặn reload khi submit hoặc nhấn Enter
 
-        if (response.data.user.role === "ADMIN") {
-          console.log("Đi tới trang admin");
-          sessionStorage.setItem("user_role", "ADMIN");
-          router.push(path.admin);
-        } else {
-          console.log("Đi tới trang home");
-          sessionStorage.setItem("user_role", "USER");
-          router.push(path.home);
-        }
-      },
-    });
-  });
+    try {
+      console.log("🚀 Gửi request login:", data);
+
+      const response = await axios.post(`${API_URL}/auth/login`, data, {
+        withCredentials: true,
+      });
+
+      console.log("✅ Login success:", response.data);
+
+      const { accessToken, user } = response.data;
+      if (!accessToken) {
+        toast.error("Phản hồi không hợp lệ từ server");
+        return;
+      }
+
+      handleLogin(accessToken);
+      toast.success("Đăng nhập thành công");
+
+      sessionStorage.setItem("user_role", user.role);
+      router.push(user.role === "ADMIN" ? path.admin : path.home);
+    } catch (error: any) {
+      console.error("❌ Login error:", error);
+
+      const msg = error.response?.data?.message;
+
+      if (msg === "Invalid password" || msg === "Sai mật khẩu") {
+        toast.error("Sai mật khẩu");
+      } else if (msg === "User not found" || msg === "Không tìm thấy người dùng") {
+        toast.error("Tài khoản không tồn tại");
+      } else {
+        toast.error(msg || "Đăng nhập thất bại, vui lòng thử lại");
+      }
+    }
+  };
 
   return (
     <div className="">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-5 py-12 lg:pr-10 items-center h-[100vh]">
-          <div className="hidden lg:block lg:grid-start-1 lg:col-span-3">
+          <div className="hidden lg:block lg:col-span-3">
             <Animate animateData={animateLogin} className="max-w-[500px]" />
           </div>
-          <div className="bg-white p-7 text-center overflow-hidden rounded-lg [box-shadow:0px_0px_4px_0px_rgba(0,_0,_0,_0.08)] lg:col-span-2 lg:col-start-4">
+
+          <div className="bg-white p-7 text-center rounded-lg shadow-sm lg:col-span-2 lg:col-start-4">
             <h2 className="font-semibold text-[18px] md:text-2xl">
               <span className="text-[#6358DC]">Chào mừng </span>bạn quay trở lại
             </h2>
-            <form className="mt-5" onSubmit={handleSubmitForm}>
-              <InputAuth
+
+            <form
+              className="mt-5"
+              onSubmit={handleSubmit(handleLoginClick)}
+            >
+                <InputAuth
                 classNameWrap={`overflow-hidden flex w-full text-[16px] outline-none border border-solid border-[#B3B3B3] rounded-[8px] focus:border-[#4F46E5] focus:shadow-sm h-[45px] ${
                   errors.identifier
                     ? `border-[#FF3B30] focus:border-[#FF3B30]`
@@ -88,7 +105,7 @@ function page() {
                 errorMessage={errors.identifier?.message}
               />
 
-              <InputAuth
+            <InputAuth
                 className="mt-2"
                 classNameWrap={`overflow-hidden flex w-full text-[16px] outline-none border border-solid border-[#B3B3B3] rounded-[8px] focus:border-[#4F46E5] focus:shadow-sm h-[45px] ${
                   errors.password
@@ -106,41 +123,38 @@ function page() {
                 errors={errors.password}
                 handleShowPassword={() => setShowPassword((prev) => !prev)}
               />
-              <div className="flex mt-1 text-[15px] gap-4 text-left flex-col sm:flex-row justify-start items-start sm:items-center sm:justify-between">
+
+              <div className="flex mt-3 text-sm justify-between">
                 <div className="flex items-center gap-x-2">
                   <input type="checkbox" id="check" />
-                  <label htmlFor="check" className="select-none">
-                    Ghi nhớ đăng nhập
-                  </label>
+                  <label htmlFor="check">Ghi nhớ đăng nhập</label>
                 </div>
-                <Link
-                  href={path.forgotPassword}
-                  className="text-[#4F46E5] cursor-pointer"
-                >
+                <Link href={path.forgotPassword} className="text-[#4F46E5]">
                   Quên mật khẩu
                 </Link>
               </div>
-              <div className="mt-5">
-                <button className="w-full text-center py-3 px-5 uppercase border border-solid rounded-[8px] bg-[#4F46E5] text-white text-sm flex items-center justify-center gap-x-2">
-                  Đăng nhập
-                </button>
-              </div>
+
+              <button
+                type="submit"
+                className="mt-5 w-full py-3 px-5 uppercase rounded-[8px] bg-[#4F46E5] text-white text-sm"
+              >
+                Đăng nhập
+              </button>
             </form>
+
             <div className="my-4 flex items-center gap-x-2">
               <hr className="w-full h-[1px] bg-[#4D4D4D]" />
               <span className="text-[#ccc]">or</span>
               <hr className="w-full h-[1px] bg-[#4D4D4D]" />
             </div>
-            <div className="flex items-center justify-between">
-              <button className="flex items-center justify-center p-3 w-full rounded-[4px] border border-solid border-[#B3B3B3] [box-shadow:0px_1px_2px_0px_rgba(16,_24,_40,_0.05)]">
-                <img src="../../../icons/google.svg" alt="google" />
-              </button>
-            </div>
-            <div className="mt-4 flex items-center gap-2 sm:justify-between flex-col sm:flex-row lg:justify-center text-[15px]">
-              <span className="text-gray-600">
-                Bạn đã có tài khoản hay chưa?
-              </span>
-              <Link href={path.register} className="text-[#4F46E5]">
+
+            <button className="flex items-center justify-center p-3 w-full border rounded-[4px] border-[#B3B3B3]">
+              <img src="../../../icons/google.svg" alt="google" />
+            </button>
+
+            <div className="mt-4 flex flex-col sm:flex-row justify-center text-[15px]">
+              <span className="text-gray-600">Bạn đã có tài khoản hay chưa?</span>
+              <Link href={path.register} className="text-[#4F46E5] ml-1">
                 Đăng ký
               </Link>
             </div>
@@ -151,4 +165,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

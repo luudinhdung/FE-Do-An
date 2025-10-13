@@ -6,24 +6,25 @@ import { useTranslation } from "react-i18next";
 function SecuritySettings() {
   const [countdown, setCountdown] = useState<number>(30);
   const { t } = useTranslation();
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
   useEffect(() => {
     // Lấy defaultCountdown từ API current user
     axios
-      .get("http://localhost:3002/users/current", { withCredentials: true })
+      .get(`${API_URL}/users/current`, { withCredentials: true })
       .then((res) => setCountdown(res.data.user.defaultCountdown))
       .catch(() => setCountdown(30));
   }, []);
 
   const handleSave = async () => {
     try {
-      const res = await axios.get("http://localhost:3002/users/current", {
+      const res = await axios.get(`${API_URL}/users/current`, {
         withCredentials: true,
       });
       const userId = res.data.user.id;
 
       await axios.patch(
-        `http://localhost:3002/users/${userId}`,
+        `${API_URL}/users/${userId}`,
         { defaultCountdown: countdown },
         { withCredentials: true }
       );
@@ -32,7 +33,7 @@ function SecuritySettings() {
       setCountdown(countdown);
 
       // 🔥 Nếu muốn chắc chắn DB đã update, fetch lại user
-      const updated = await axios.get("http://localhost:3002/users/current", {
+      const updated = await axios.get(`${API_URL}/users/current`, {
         withCredentials: true,
       });
       setCountdown(updated.data.user.defaultCountdown);

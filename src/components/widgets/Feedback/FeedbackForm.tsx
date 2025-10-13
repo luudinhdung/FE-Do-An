@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 interface FeedbackFormProps {
   onClose: () => void;
 }
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
 
 export default function FeedbackForm({ onClose }: FeedbackFormProps) {
   const [user, setUser] = useState<any>(null); // lưu user từ API
@@ -22,7 +23,7 @@ export default function FeedbackForm({ onClose }: FeedbackFormProps) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get("http://localhost:3002/users/current", {
+        const res = await axios.get(`${API_URL}/users/current`, {
           withCredentials: true,
         });
         setUser(res.data.user);
@@ -72,7 +73,7 @@ export default function FeedbackForm({ onClose }: FeedbackFormProps) {
         // nếu backend cần index thì: formData.append(`screenshots[${index}]`, file);
       });
 
-      const res = await fetch("http://localhost:3002/feedback", {
+      const res = await fetch(`${API_URL}/feedback`, {
         method: "POST",
         body: formData,
       });

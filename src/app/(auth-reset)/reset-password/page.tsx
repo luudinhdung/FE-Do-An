@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-export default function page() {
+export default function Page() {
   const {
     register,
     handleSubmit,
