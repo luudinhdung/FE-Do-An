@@ -33,7 +33,14 @@ pipeline {
           sh 'npm run build'
       }
     }
+    
 
+    stage('Clean Docker Cache') {
+      steps {
+          sh 'docker system prune -af || true'
+      }
+  }
+    
     stage('Build Docker Image') {
       steps {
         sh "docker build -t ${IMAGE}:${IMAGE_TAG} -f ./frontend/Dockerfile ./frontend"
