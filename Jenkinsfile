@@ -39,7 +39,7 @@ pipeline {
       steps {
           sh 'docker system prune -af || true'
       }
-  }
+    } 
     
     stage('Build Docker Image') {
       steps {
