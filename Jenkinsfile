@@ -29,8 +29,14 @@ pipeline {
 
     stage('Install & Build') {
       steps {
-          sh 'npm ci'
-          sh 'npm run build'
+          sh '''
+            echo "📦 Installing Node.js..."
+            apk add --no-cache nodejs npm
+            node -v
+            npm -v
+            npm ci
+            npm run build
+          '''
       }
     }
     
