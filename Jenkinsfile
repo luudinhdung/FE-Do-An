@@ -1,12 +1,18 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      // Image có sẵn Docker CLI, ta mount Docker socket để Jenkins dùng Docker ngoài host
+      image 'docker:27.0.3-cli'
+      args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+    }
+  }
 
    environment {
     IMAGE = "dungsave123/chat-frontend"
-    DOCKER_CRED = 'dockerhub-cred'   // replace
-    SSH_CRED = 'gcp-ssh-key'            // replace
-    REMOTE_USER = 'dungsave123'         // replace
-    REMOTE_HOST = '35.188.81.254'      // replace
+    DOCKER_CRED = 'dockerhub-credentials'
+    SSH_CRED = 'gcp-ssh-key'
+    REMOTE_USER = 'dinhtuanzzzaa'
+    REMOTE_HOST = '35.188.81.254'
     REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as' // replace if different
   }
 
@@ -23,10 +29,8 @@ pipeline {
 
     stage('Install & Build') {
       steps {
-        dir('frontend') {
           sh 'npm ci'
           sh 'npm run build'
-        }
       }
     }
 
