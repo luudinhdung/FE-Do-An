@@ -43,7 +43,7 @@ pipeline {
     
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${IMAGE}:${IMAGE_TAG} -f ./frontend/Dockerfile ./frontend"
+        sh "docker build -t ${IMAGE}:${IMAGE_TAG} ."
       }
     }
 
