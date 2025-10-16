@@ -72,8 +72,8 @@ pipeline {
           sh """
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
               cd ${REMOTE_PROJECT_DIR} &&
-              docker compose pull chat-frontend || true &&
-              docker compose up -d chat-frontend
+              docker compose pull frontend || true &&
+              docker compose up -d frontend
             '
           """
         }
