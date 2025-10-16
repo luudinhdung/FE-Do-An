@@ -82,7 +82,7 @@ function Page() {
 
           <div className="bg-white p-7 text-center rounded-lg shadow-sm lg:col-span-2 lg:col-start-4">
             <h2 className="font-semibold text-[18px] md:text-2xl">
-              <span className="text-[#6358DC]">Chào mừng </span>bạn quay trở lại
+              <span className="text-[#6358DC]">Chào mừng </span>bạn quay trở lại123321
             </h2>
 
             <form
