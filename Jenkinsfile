@@ -49,7 +49,7 @@ pipeline {
     
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${IMAGE}:${IMAGE_TAG} ."
+        sh "docker build --no-cache -t ${IMAGE}:${IMAGE_TAG} ."
       }
     }
 
