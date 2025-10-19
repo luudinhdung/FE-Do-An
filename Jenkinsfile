@@ -68,19 +68,5 @@ pipeline {
         }
       }
     }
-
-    stage('Deploy') {
-      steps {
-        sshagent([SSH_CRED]) {
-          sh """
-            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
-              cd ${REMOTE_PROJECT_DIR} &&
-              docker compose pull frontend || true &&
-              docker compose up -d frontend
-            '
-          """
-        }
-      }
-    }
   }
 }
