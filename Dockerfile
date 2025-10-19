@@ -4,13 +4,13 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files trước để tận dụng cache layer
+# Copy package files để tận dụng cache
 COPY package*.json ./
 
-# Cài dependencies (đầy đủ để build)
+# Cài dependency đầy đủ
 RUN npm ci
 
-# Copy toàn bộ source code
+# Copy toàn bộ source
 COPY . .
 
 # Build Next.js (tạo folder .next)
@@ -24,20 +24,19 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy file cần thiết
+# Copy package files
 COPY package*.json ./
 
-# Cài dependencies production (giữ lại peer dependencies để tránh lỗi framer-motion)
-RUN npm ci --omit=dev || npm install --omit=dev
+# Copy node_modules từ builder sang
+COPY --from=builder /app/node_modules ./node_modules
 
-# Copy build output từ builder
+# Copy build output và public assets
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.mjs ./
 
-# Copy các file config bổ sung nếu cần (ví dụ .env.production)
-# COPY --from=builder /app/.env.production ./
-
-# Mở cổng và chạy
+# Expose cổng
 EXPOSE 3000
+
+# Start app
 CMD ["npm", "start"]
