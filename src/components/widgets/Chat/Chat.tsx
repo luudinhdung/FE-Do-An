@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/ui/Button/Button";
+import { motion } from "framer-motion";
 import {
   ChevronDoubleDown,
   IconAttachment,
@@ -64,6 +65,7 @@ function Chat({
   participants = [],
 }: MessageProps) {
   const [message, setMessage] = useState("");
+  const [isReady, setIsReady] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentUserName, setCurrentUserName] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -193,7 +195,16 @@ function Chat({
 
     fetchCurrentUser();
   }, []);
-
+useEffect(() => {
+  if (currentUserName && currentUserId && messages.length > 0) {
+    const timeout = setTimeout(() => {
+      setIsReady(true);
+    }, 250); // 250ms để đảm bảo layout ổn định
+    return () => clearTimeout(timeout);
+  } else {
+    setIsReady(false); // reset nếu mất dữ liệu
+  }
+}, [currentUserName, currentUserId, messages]);
   // Xử lý xoá message
   const handleDeleteMessage = async (messageId: string) => {
     try {
@@ -968,358 +979,233 @@ function Chat({
       </div>
 
       {/* Phần nội dung tin nhắn */}
-      <div
-        ref={chatContentRef}
-        className="flex-1 p-4 md:p-6 bg-[#F6F6F6] dark:bg-[#0A0F0D] chat-scrollbar"
-        style={{ scrollbarColor: "#99b39b transparent" }}
-      >
-        {messages.map((msg, index) => {
-          const isCurrentUser = msg.sender === currentUserName;
-          const nameFriend = !isCurrentUser ? msg.sender : "";
-          const type = msg.type;
-          console.log("IMAGE message:", {
-            id: msg.id,
-            previewUrl: msg.previewUrl,
-            fileUrl: msg.fileUrl,
-            decrypted: msg.decrypted,
-          });
 
-          const repliedMsg = msg.repliedMessageId
-            ? messages.find((m) => m.messageId === msg.repliedMessageId)
-            : null;
+<div
+  ref={chatContentRef}
+  className="flex-1 p-4 md:p-6 bg-[#F6F6F6] dark:bg-[#0A0F0D] chat-scrollbar"
+  style={{ scrollbarColor: "#99b39b transparent" }}
+>
+  {!isReady ? (
+    <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-300 animate-pulse">
+      Đang tải tin nhắn...
+    </div>
+  ) : (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      {messages.map((msg, index) => {
+        const isCurrentUser = msg.sender === currentUserName;
+        const nameFriend = !isCurrentUser ? msg.sender : "";
+        const type = msg.type;
 
-          return (
-            <div
-              key={msg.messageId}
-              className={`mb-3 flex ${
-                isCurrentUser ? "justify-end" : "justify-start"
-              } group`}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                setShowDeleteForId(msg.messageId || null);
-              }}
-            >
-              {!isCurrentUser && msg.avatar && (
-                <img
-                  src={msg.avatar}
-                  alt="avatar"
-                  className="w-8 h-8 rounded-full mr-2 shadow"
-                />
-              )}
+        const repliedMsg = msg.repliedMessageId
+          ? messages.find((m) => m.messageId === msg.repliedMessageId)
+          : null;
 
-              <div className="flex flex-col max-w-[85%] md:max-w-[75%] relative group">
-                {repliedMsg && repliedMsg.content && (
-                  <div
-                    className={`text-xs mb-1 px-2 py-1 rounded-t-lg w-fit max-w-full ${
-                      isCurrentUser
-                        ? "bg-[#D1FFE7] text-[#00664D] ml-auto"
-                        : "bg-[#DFFFEF] dark:bg-[#0F2218] text-[#005A3C] dark:text-[#1AFF1A]"
-                    }`}
-                  >
-                    <span className="font-medium">Trả lời:</span>{" "}
-                    <span className="truncate">
-                      {repliedMsg.content.substring(0, 50)}
-                      {repliedMsg.content.length > 50 ? "..." : ""}
-                    </span>
-                  </div>
-                )}
+        return (
+          <motion.div
+            key={msg.messageId}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: index * 0.03 }}
+            className={`mb-3 flex ${
+              isCurrentUser ? "justify-end" : "justify-start"
+            } group`}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setShowDeleteForId(msg.messageId || null);
+            }}
+          >
+            {!isCurrentUser && msg.avatar && (
+              <img
+                src={msg.avatar}
+                alt="avatar"
+                className="w-8 h-8 rounded-full mr-2 shadow"
+              />
+            )}
 
+            <div className="flex flex-col max-w-[85%] md:max-w-[75%] relative group">
+              {repliedMsg && repliedMsg.content && (
                 <div
-                  className={`flex ${
-                    isCurrentUser ? "justify-end" : "justify-start"
+                  className={`text-xs mb-1 px-2 py-1 rounded-t-lg w-fit max-w-full ${
+                    isCurrentUser
+                      ? "bg-[#D1FFE7] text-[#00664D] ml-auto"
+                      : "bg-[#DFFFEF] dark:bg-[#0F2218] text-[#005A3C] dark:text-[#1AFF1A]"
                   }`}
                 >
+                  <span className="font-medium">Trả lời:</span>{" "}
+                  <span className="truncate">
+                    {repliedMsg.content.substring(0, 50)}
+                    {repliedMsg.content.length > 50 ? "..." : ""}
+                  </span>
+                </div>
+              )}
+
+              <div
+                className={`flex ${
+                  isCurrentUser ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`flex ${isCurrentUser ? "flex-row-reverse" : ""}`}
+                >
                   <div
-                    className={`flex ${
-                      isCurrentUser ? "flex-row-reverse" : ""
-                    }`}
-                  >
-                    <div
-                      onDoubleClick={() => {
-                        // Check if user already has a reaction
-                        const userReaction = msg.reactions?.find(
-                          (r) => r.userId === currentUserId
-                        );
-                        if (userReaction) {
-                          // Remove existing reaction
-                          handleRemoveReact(msg.messageId!);
-                        } else {
-                          // Add heart reaction
-                          handleReact(msg.messageId!, "❤️");
-                        }
-                      }}
-                      className={`p-3 rounded-2xl relative break-all shadow-sm
-${
-  isCurrentUser
-    ? "bg-[#E5FFF1] dark:bg-[#0f1e17] text-black dark:text-[#1AFF1A] rounded-tl-none border border-[#00D084] dark:border-[#1AFF1A]"
-    : "bg-[#FFFFFF] border border-[#1AFF1A] text-black rounded-tr-none"
+                    onDoubleClick={() => {
+                      const userReaction = msg.reactions?.find(
+                        (r) => r.userId === currentUserId
+                      );
+                      if (userReaction) {
+                        handleRemoveReact(msg.messageId!);
+                      } else {
+                        handleReact(msg.messageId!, "❤️");
+                      }
+                    }}
+                    className={`p-3 rounded-2xl relative break-all shadow-sm
+${isCurrentUser
+  ? "bg-[#E5FFF1] dark:bg-[#0f1e17] text-black dark:text-[#1AFF1A] rounded-tl-none border border-[#00D084] dark:border-[#1AFF1A]"
+  : "bg-[#FFFFFF] border border-[#1AFF1A] text-black rounded-tr-none"
 }
-max-w-[min(90vw,800px)]
-`}
+max-w-[min(90vw,800px)]`}
+                  >
+                    <div className="text-xs mb-1 flex text-gray-500 dark:text-gray-400">
+                      <span className="whitespace-pre-wrap">{nameFriend}</span>
+                    </div>
+
+                    <div className="whitespace-pre-wrap break-all leading-[22px]">
+                      {msg.type === "IMAGE" ? (
+                        <div className="relative">
+                          <img
+                            src={msg.previewUrl || msg.content}
+                            alt={msg.fileName || "encrypted image"}
+                            className={`max-w-xs max-h-64 rounded-lg border transition-all duration-300 ${
+                              msg.decrypted
+                                ? "blur-0 opacity-250"
+                                : "blur-md opacity-100"
+                            }`}
+                            onClick={() => {
+                              if (msg.decrypted) {
+                                window.open(
+                                  msg.fileUrl ||
+                                    msg.previewUrl ||
+                                    msg.content,
+                                  "_blank"
+                                );
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : msg.type === "FILE" && msg.decrypted ? (
+                        <a
+                          href={
+                            msg.fileUrl ||
+                            msg.attachments?.[0]?.url ||
+                            msg.content
+                          }
+                          target="_blank"
+                          download={msg.fileName}
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 px-3 py-2 rounded-lg transition-colors duration-200 max-w-xs"
+                        >
+                          <span className="text-lg">📄</span>
+                          <span className="truncate text-blue-600 dark:text-blue-400 font-medium">
+                            {msg.fileName || t("chatBox.attachment")}
+                          </span>
+                        </a>
+                      ) : (
+                        <span>{msg.content}</span>
+                      )}
+                    </div>
+
+                    <div
+                      className={`text-xs mt-1 flex justify-start ${
+                        isCurrentUser
+                          ? " dark:text-[#1AFF1A] text-gray-500"
+                          : "text-gray-500"
+                      }`}
                     >
-                      <div className="text-xs mb-1 flex text-gray-500 dark:text-gray-400">
-                        <span className="whitespace-pre-wrap">
-                          {nameFriend}
-                        </span>
-                      </div>
+                      {msg.createdAt.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
 
-                      <div className="whitespace-pre-wrap break-all leading-[22px]">
-                        {msg.type === "IMAGE" ? (
-                          <div className="relative">
-                            <img
-                              src={msg.previewUrl || msg.content}
-                              alt={msg.fileName || "encrypted image"}
-                              className={`max-w-xs max-h-64 rounded-lg border transition-all duration-300 ${
-                                msg.decrypted
-                                  ? "blur-0 opacity-250"
-                                  : "blur-md opacity-100"
-                              }`}
-                              onClick={() => {
-                                if (msg.decrypted) {
-                                  window.open(
-                                    msg.fileUrl ||
-                                      msg.previewUrl ||
-                                      msg.content,
-                                    "_blank"
-                                  );
-                                }
+                    {/* ✅ Reaction + chức năng khác giữ nguyên */}
+                    <div
+                      className={`absolute -bottom-2 ${
+                        isCurrentUser ? "right-0" : ""
+                      } flex items-center z-10 reaction-container`}
+                      onMouseEnter={() =>
+                        setShowReactionPicker(msg.messageId ?? null)
+                      }
+                      onMouseLeave={() => setShowReactionPicker(null)}
+                    >
+                      {msg.reactions && msg.reactions.length > 0 ? (
+                        <div className="border border-gray-200 dark:border-gray-600 rounded-full px-2 py-1 flex items-center gap-1">
+                          {Object.entries(
+                            msg.reactions.reduce((acc: any, r: any) => {
+                              acc[r.emoji] = (acc[r.emoji] || 0) + 1;
+                              return acc;
+                            }, {})
+                          ).map(([emoji, count]) => (
+                            <span
+                              key={emoji}
+                              className="flex items-center text-sm cursor-pointer hover:scale-110 transition-transform"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const userReaction = msg.reactions?.find(
+                                  (r) =>
+                                    r.userId === currentUserId &&
+                                    r.emoji === emoji
+                                );
+                                if (userReaction)
+                                  handleRemoveReact(msg.messageId!);
+                                else handleReact(msg.messageId!, emoji);
                               }}
-                            />
-                           
-                          </div>
-                        ) : msg.type === "FILE" && msg.decrypted ? (
-                          <a
-                            href={
-                              msg.fileUrl ||
-                              msg.attachments?.[0]?.url ||
-                              msg.content
-                            }
-                            target="_blank"
-                            download={msg.fileName}
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500 px-3 py-2 rounded-lg transition-colors duration-200 max-w-xs"
-                          >
-                            <span className="text-lg">📄</span>
-                            <span className="truncate text-blue-600 dark:text-blue-400 font-medium">
-                              {msg.fileName || t("chatBox.attachment")}
-                            </span>
-                          </a>
-                        ) : (
-                          <span>{msg.content}</span>
-                        )}
-                      </div>
-
-                      <div
-                        className={`text-xs mt-1 flex justify-start ${
-                          isCurrentUser
-                            ? " dark:text-[#1AFF1A] text-gray-500"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {msg.createdAt.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-
-                      {/* ✅ Improved: Reaction area với hover */}
-                      <div
-                        className={`absolute -bottom-2 ${
-                          isCurrentUser ? "right-0" : ""
-                        } flex items-center z-10 reaction-container`}
-                        onMouseEnter={() =>
-                          setShowReactionPicker(msg.messageId ?? null)
-                        }
-                        onMouseLeave={() => setShowReactionPicker(null)}
-                      >
-                        {/* Hiển thị reactions có sẵn */}
-                        {msg.reactions && msg.reactions.length > 0 ? (
-                          <div className=" border border-gray-200 dark:border-gray-600 rounded-full px-2 py-1  flex items-center gap-1">
-                            {Object.entries(
-                              msg.reactions.reduce(
-                                (acc: any, reaction: any) => {
-                                  acc[reaction.emoji] =
-                                    (acc[reaction.emoji] || 0) + 1;
-                                  return acc;
-                                },
-                                {}
-                              )
-                            ).map(([emoji, count]) => (
+                            >
                               <span
-                                key={emoji}
-                                className="flex items-center text-sm cursor-pointer hover:scale-110 transition-transform"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const userReaction = msg.reactions?.find(
+                                className={`${
+                                  msg.reactions?.some(
                                     (r) =>
                                       r.userId === currentUserId &&
                                       r.emoji === emoji
-                                  );
-                                  if (userReaction) {
-                                    handleRemoveReact(msg.messageId!);
-                                  } else {
-                                    handleReact(msg.messageId!, emoji);
-                                  }
-                                }}
+                                  )
+                                    ? "opacity-100"
+                                    : "opacity-70"
+                                }`}
                               >
-                                <span
-                                  className={`${
-                                    msg.reactions?.some(
-                                      (r) =>
-                                        r.userId === currentUserId &&
-                                        r.emoji === emoji
-                                    )
-                                      ? "opacity-100"
-                                      : "opacity-70"
-                                  }`}
-                                >
-                                  {emoji}
-                                </span>
-                                {(count as number) > 1 && (
-                                  <span className="ml-1 text-xs text-gray-500 font-medium">
-                                    {count as number}
-                                  </span>
-                                )}
+                                {emoji}
                               </span>
-                            ))}
-                          </div>
-                        ) : (
-                          /* Default heart icon (mờ) khi chưa có reaction */
-                          <div className="opacity-0 group-hover:opacity-50 transition-opacity duration-200">
-                            <div
-                              className="border border-gray-200 dark:border-gray-600 rounded-full w-8 h-8 flex items-center justify-center shadow-sm hover:opacity-100 hover:scale-110 transition-all duration-200 cursor-pointer"
-                              title="Chọn biểu cảm"
-                            >
-                              <span className="text-sm text-gray-400">❤️</span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* ✅ Reaction picker với hover - positioned relative to reaction container */}
-                        <div
-                          className={`absolute ${
-                            isCurrentUser ? "right-0" : "left-0"
-                          } -top-9 transition-all duration-200 ${
-                            showReactionPicker === msg.messageId
-                              ? "opacity-100 scale-100 pointer-events-auto"
-                              : "opacity-0 scale-95 pointer-events-none"
-                          }`}
-                        >
-                          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-full  shadow-lg flex gap-1">
-                            {["👍", "❤️", "😂", "😮", "😢", "😡"].map(
-                              (emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const userReaction = msg.reactions?.find(
-                                      (r) =>
-                                        r.userId === currentUserId &&
-                                        r.emoji === emoji
-                                    );
-
-                                    if (userReaction) {
-                                      handleRemoveReact(msg.messageId!);
-                                    } else {
-                                      handleReact(msg.messageId!, emoji);
-                                    }
-                                    setShowReactionPicker(null);
-                                  }}
-                                  className={`text-lg hover:scale-125 transition-transform duration-200 p-1 rounded-full ${
-                                    msg.reactions?.some(
-                                      (r) =>
-                                        r.userId === currentUserId &&
-                                        r.emoji === emoji
-                                    )
-                                      ? " dark:bg-blue-900 scale-100"
-                                      : " dark:hover:bg-gray-700"
-                                  }`}
-                                >
-                                  {emoji}
-                                </button>
-                              )
-                            )}
+                              {(count as number) > 1 && (
+                                <span className="ml-1 text-xs text-gray-500 font-medium">
+                                  {count as number}
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="opacity-0 group-hover:opacity-50 transition-opacity duration-200">
+                          <div
+                            className="border border-gray-200 dark:border-gray-600 rounded-full w-8 h-8 flex items-center justify-center shadow-sm hover:opacity-100 hover:scale-110 transition-all duration-200 cursor-pointer"
+                            title="Chọn biểu cảm"
+                          >
+                            <span className="text-sm text-gray-400">❤️</span>
                           </div>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Các nút chức năng khác */}
-                    <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 mx-2 self-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          msg.decrypted
-                            ? handleReEncrypt(index)
-                            : handleManualDecrypt(index);
-                        }}
-                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-600 dark:text-gray-300"
-                        title={
-                          msg.decrypted
-                            ? t("chatBox.reEncrypt")
-                            : t("chatBox.decrypt")
-                        }
-                      >
-                        {msg.decrypted ? (
-                          <Lock size={14} />
-                        ) : (
-                          <Unlock size={14} />
-                        )}
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setRepliedMessage(msg);
-                          repliedMessageIdRef.current = msg.messageId ?? null;
-                          setTimeout(() => {
-                            textareaRef.current?.focus();
-                          }, 0);
-                        }}
-                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-600 dark:text-gray-300"
-                        title={t("chatBox.replyMessage")}
-                      >
-                        <RepMess />
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteMessage(msg.messageId!);
-                          toast.success(t("chatBox.deleteMessageSuccess"));
-                        }}
-                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300"
-                        title={t("chatBox.deleteMessage")}
-                      >
-                        <IconDelete />
-                      </button>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          );
-        })}
-
-        {globalDecrypting && (
-          <div className="fixed bottom-[80px] right-96 z-30 flex items-center gap-2 dark:bg-black bg-[#7c7c7c] text-white dark:text-black px-3 py-2 rounded-full shadow-lg hover:scale-105 transition-all duration-200">
-            <Clock className="w-4 h-4" />
-            <span>{globalCountdown}s</span>
-          </div>
-        )}
-
-        {isUserScrolledUp && (
-          <button
-            onClick={() => {
-              messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="fixed bottom-[90px] z-30 bg-[#7c7c7c] dark:bg-[#1AFF1A] text-white dark:text-black px-1 py-1 rounded-full shadow-lg hover:scale-105 transition-all duration-200"
-          >
-            <ChevronDoubleDown />
-          </button>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          </motion.div>
+        );
+      })}
+    </motion.div>
+  )}
+</div>
 
       {/* Phần hiển thị đang trả lời tin nhắn nào */}
       {repliedMessage && (
