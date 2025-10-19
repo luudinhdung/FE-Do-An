@@ -53,15 +53,18 @@ pipeline {
       }
     }
 
-    stage('Push Images') {
+    stage('Deploy') {
       steps {
-        withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push ${IMAGE}:${IMAGE_TAG}
-            docker tag ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
-            docker push ${IMAGE}:latest
-          '''
+        sshagent([SSH_CRED]) {
+          sh """
+            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
+              cd ${REMOTE_PROJECT_DIR} &&
+              docker compose down &&
+              docker image rm -f ${IMAGE}:latest || true &&
+              docker compose pull frontend &&
+              docker compose up -d frontend
+            '
+          """
         }
       }
     }
