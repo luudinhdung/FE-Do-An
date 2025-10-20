@@ -1,55 +1,47 @@
 pipeline {
   agent {
     docker {
-      // Image có sẵn Docker CLI, ta mount Docker socket để Jenkins dùng Docker ngoài host
+      // Image có sẵn Docker CLI, mount Docker socket để Jenkins dùng Docker ngoài host
       image 'docker:27.0.3-cli'
       args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
 
-   environment {
-    IMAGE = "dungsave123/chat-frontend"
+  environment {
+    IMAGE = 'dungsave123/chat-frontend'
     DOCKER_CRED = 'dockerhub-credentials'
     SSH_CRED = 'gcp-ssh-key'
     REMOTE_USER = 'dinhtuanzzzaa'
     REMOTE_HOST = '35.188.81.254'
-    REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as' // replace if different
+    REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as'
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         checkout scm
         script {
-          GIT_SHORT = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
-          env.IMAGE_TAG = "${GIT_SHORT}"
+          env.GIT_SHORT = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
         }
       }
     }
 
-    stage('Install & Build') {
-      steps {
-          sh '''
-            echo "📦 Installing Node.js..."
-            apk add --no-cache nodejs npm
-            node -v
-            npm -v
-            npm ci
-            npm run build
-          '''
-      }
-    }
-    
-
-    stage('Clean Docker Cache') {
-      steps {
-          sh 'docker system prune -af || true'
-      }
-    } 
-    
     stage('Build Docker Image') {
       steps {
-        sh "docker build --no-cache -t ${IMAGE}:${IMAGE_TAG} ."
+        sh "docker build --no-cache -t ${IMAGE}:latest ."
+      }
+    }
+
+    stage('Push Docker Image') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh '''
+            echo "🚀 Pushing image to Docker Hub..."
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            docker push ${IMAGE}:latest
+          '''
+        }
       }
     }
 
@@ -61,7 +53,7 @@ pipeline {
               cd ${REMOTE_PROJECT_DIR} &&
               docker compose down &&
               docker compose pull frontend &&
-              docker compose up -d frontend
+              docker compose up -d --force-recreate frontend
             '
           """
         }
