@@ -27,9 +27,30 @@ export default function Page() {
     }
   }, [isAuthenticated]);
 
-  const handleSubmitForm = handleSubmit((data) => {
-    console.log(data);
-  });
+  const handleSubmitForm = handleSubmit(async (data) => {
+  try {
+    const res = await fetch("http://localhost:3002/auth/verify-otp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ otp: data.otp }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.message || "Mã OTP không hợp lệ");
+    }
+
+    alert("Xác minh OTP thành công!");
+    localStorage.setItem("otpCode", data.otp);
+    navigate.push("/reset-password");
+  } catch (error: any) {
+    console.error(error);
+    setError("otp", { message: error.message });
+  }
+});
 
   return (
     <div id="forgot-password" className="font-poppins bg-[#F4F4F4] min-h-screen flex items-center justify-center">

@@ -27,9 +27,32 @@ export default function Page() {
     }
   }, [isAuthenticated]);
 
-  const handleSubmitForm = handleSubmit((data) => {
-    console.log(data);
-  });
+  const handleSubmitForm = handleSubmit(async (data) => {
+  try {
+    const email = localStorage.getItem("resetEmail");
+    const otp = localStorage.getItem("otpCode");
+
+    const res = await fetch("http://localhost:3002/auth/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,             // ✅ lấy từ localStorage
+        otp,               // ✅ lấy từ localStorage
+        newPassword: data.password,
+      }),
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Đặt lại mật khẩu thất bại");
+
+    alert("Đặt lại mật khẩu thành công!");
+    localStorage.removeItem("resetEmail");
+    localStorage.removeItem("otpCode");
+    navigate.push("/login");
+  } catch (error: any) {
+    setError("password", { message: error.message });
+  }
+});
 
   return (
     <div id="reset-password" className="font-poppins bg-[#F4F4F4] min-h-screen flex items-center justify-center">

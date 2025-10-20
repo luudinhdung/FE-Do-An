@@ -27,9 +27,30 @@ function Page() {
     }
   }, [isAuthenticated]);
 
-  const handleSubmitForm = handleSubmit((data) => {
-    console.log(data);
-  });
+const handleSubmitForm = handleSubmit(async (data) => {
+  try {
+    const res = await fetch("http://localhost:3002/auth/send-otp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: data.email }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.message || "Gửi OTP thất bại");
+    }
+
+    alert("Mã OTP đã được gửi đến email của bạn!");
+    localStorage.setItem("resetEmail", data.email);
+    navigate.push("/verify-otp"); // chuyển sang trang nhập OTP
+  } catch (error: any) {
+    console.error(error);
+    setError("email", { message: error.message });
+  }
+});
 
   return (
     <div id="verify-password" className="font-poppins bg-[#F4F4F4] min-h-screen flex items-center justify-center">
