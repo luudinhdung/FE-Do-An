@@ -1111,10 +1111,7 @@ function Chat({
                           : "bg-[#FFFFFF] border border-[#1AFF1A] text-black rounded-tr-none"
                       }
                       max-w-[min(90vw,800px)]`}
-                      >
-
-
-                          
+                        >
                           <div className="text-xs mb-1 flex text-gray-500 dark:text-gray-400">
                             <span className="whitespace-pre-wrap">
                               {nameFriend}
@@ -1180,9 +1177,9 @@ function Chat({
                           </div>
 
                           <div
-                      className={`absolute top-1/2 -translate-y-1/2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 ${
-  isCurrentUser ? "left-[-74px]" : "right-[-74px]"
-}`}
+                            className={`absolute top-1/2 -translate-y-1/2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 ${
+                              isCurrentUser ? "left-[-74px]" : "right-[-74px]"
+                            }`}
                           >
                             {/* Nút reply */}
                             <button
@@ -1228,57 +1225,66 @@ function Chat({
                           </div>
 
                           <div className="absolute -bottom-2 right-2">
+                            {/* Trái tim trigger (luôn có, hover vào trái tim sẽ hiện picker) */}
+                            {/* Trái tim trigger */}
+                            <div className="relative inline-block ml-2">
+                              {/* Nút emoji (hoặc trái tim mặc định nếu chưa có reaction của current user) */}
+                              <div
+                                className="border border-gray-200 dark:border-gray-600 rounded-full w-8 h-8 flex items-center justify-center shadow-sm hover:scale-110 transition-transform cursor-pointer bg-white dark:bg-[#111]"
+                                onMouseEnter={() =>
+                                  setShowReactionPicker(msg.messageId ?? null)
+                                }
+                                onMouseLeave={() => setShowReactionPicker(null)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowReactionPicker(
+                                    showReactionPicker === msg.messageId
+                                      ? null
+                                      : (msg.messageId as string)
+                                  );
+                                }}
+                                title="Thả cảm xúc"
+                              >
+                                {/* Nếu user hiện tại đã react → hiển thị emoji đó, ngược lại hiển thị ❤️ */}
+                                <span className="text-base">
+                                  {msg.reactions?.find(
+                                    (r) => r.userId === currentUserId
+                                  )?.emoji || "❤️"}
+                                </span>
+                              </div>
 
-  {/* Trái tim trigger (luôn có, hover vào trái tim sẽ hiện picker) */}
-{/* Trái tim trigger */}
-<div className="relative inline-block ml-2">
-  {/* Nút emoji (hoặc trái tim mặc định nếu chưa có reaction của current user) */}
-  <div
-    className="border border-gray-200 dark:border-gray-600 rounded-full w-8 h-8 flex items-center justify-center shadow-sm hover:scale-110 transition-transform cursor-pointer bg-white dark:bg-[#111]"
-    onMouseEnter={() => setShowReactionPicker(msg.messageId ?? null)}
-    onMouseLeave={() => setShowReactionPicker(null)}
-    onClick={(e) => {
-      e.stopPropagation();
-      setShowReactionPicker(
-        showReactionPicker === msg.messageId ? null : (msg.messageId as string)
-      );
-    }}
-    title="Thả cảm xúc"
-  >
-    {/* Nếu user hiện tại đã react → hiển thị emoji đó, ngược lại hiển thị ❤️ */}
-    <span className="text-base">
-      {msg.reactions?.find((r) => r.userId === currentUserId)?.emoji || "❤️"}
-    </span>
-  </div>
-
-  {/* Reaction picker — xuất hiện khi hover hoặc click */}
-  {showReactionPicker === msg.messageId && (
-    <div
-      className="absolute bottom-[-50px] right-0 flex items-center gap-2 bg-white dark:bg-[#111] p-2 rounded-full shadow-lg z-40 border border-gray-200 dark:border-gray-600"
-      onMouseEnter={() => setShowReactionPicker(msg.messageId ?? null)}
-      onMouseLeave={() => setShowReactionPicker(null)}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {["❤️", "😂", "😮", "😢", "👍"].map((emoji) => (
-        <button
-          key={emoji}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleReact(msg.messageId!, emoji); // dùng hàm sẵn có
-            setShowReactionPicker(null); // đóng picker sau khi chọn
-          }}
-          className="text-lg p-1 hover:scale-125 transition-transform"
-          title={`Thả ${emoji}`}
-        >
-          {emoji}
-        </button>
-      ))}
-    </div>
-  )}
-</div>
-
-</div>
-
+                              {/* Reaction picker — xuất hiện khi hover hoặc click */}
+                              {showReactionPicker === msg.messageId && (
+                                <div
+                                  className="absolute bottom-[-50px] right-0 flex items-center gap-2 bg-white dark:bg-[#111] p-2 rounded-full shadow-lg z-40 border border-gray-200 dark:border-gray-600"
+                                  onMouseEnter={() =>
+                                    setShowReactionPicker(msg.messageId ?? null)
+                                  }
+                                  onMouseLeave={() =>
+                                    setShowReactionPicker(null)
+                                  }
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {["❤️", "😂", "😮", "😢", "👍"].map(
+                                    (emoji) => (
+                                      <button
+                                        key={emoji}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleReact(msg.messageId!, emoji); // dùng hàm sẵn có
+                                          setShowReactionPicker(null); // đóng picker sau khi chọn
+                                        }}
+                                        className="text-lg p-1 hover:scale-125 transition-transform"
+                                        title={`Thả ${emoji}`}
+                                      >
+                                        {emoji}
+                                      </button>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

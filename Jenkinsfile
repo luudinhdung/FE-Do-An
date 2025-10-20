@@ -60,7 +60,6 @@ pipeline {
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
               cd ${REMOTE_PROJECT_DIR} &&
               docker compose down &&
-              docker image rm -f ${IMAGE}:latest || true &&
               docker compose pull frontend &&
               docker compose up -d frontend
             '
