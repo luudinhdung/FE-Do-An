@@ -1,7 +1,6 @@
 pipeline {
   agent {
     docker {
-      // Image có sẵn Docker CLI, mount Docker socket để Jenkins dùng Docker ngoài host
       image 'docker:27.0.3-cli'
       args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
     }
@@ -14,6 +13,14 @@ pipeline {
     REMOTE_USER = 'dinhtuanzzzaa'
     REMOTE_HOST = '35.188.81.254'
     REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as'
+
+    // 🔹 Thêm biến để Jenkins biết dùng SonarQube server nào
+    SONARQUBE_SERVER = 'sonarqube' // phải trùng tên bạn config trong Manage Jenkins > System
+  }
+
+  tools {
+    // 🔹 Cần có sonar-scanner (bạn phải cài plugin SonarQube Scanner trước)
+    sonarQubeScanner 'sonar-scanner'
   }
 
   stages {
@@ -23,6 +30,23 @@ pipeline {
         checkout scm
         script {
           env.GIT_SHORT = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+        }
+      }
+    }
+
+    // 🧩 Thêm stage SonarQube ở đây
+    stage('Code Analysis - SonarQube') {
+      steps {
+        withSonarQubeEnv("${SONARQUBE_SERVER}") {
+          sh '''
+            echo "🔍 Running SonarQube analysis..."
+            sonar-scanner \
+              -Dsonar.projectKey=chat-frontend \
+              -Dsonar.projectName="Chat Frontend" \
+              -Dsonar.sources=. \
+              -Dsonar.projectVersion=${GIT_SHORT} \
+              -Dsonar.host.url=$SONAR_HOST_URL
+          '''
         }
       }
     }
