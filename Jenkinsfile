@@ -27,24 +27,27 @@ pipeline {
         }
       }
     }
-  
+
     stage('SonarQube Analysis') {
       steps {
-        withSonarQubeEnv(SONARQUBE_SERVER) {
-          sh '''
-            echo "🔍 Running SonarQube analysis..."
-            sonar-scanner \
-              -Dsonar.projectKey=chat-frontend \
-              -Dsonar.projectName="Chat Frontend" \
-              -Dsonar.sources=. \
-              -Dsonar.projectVersion=${GIT_SHORT} \
-              -Dsonar.host.url=$SONAR_HOST_URL
-          '''
+        // Chạy SonarQube scan bên trong container có sẵn sonar-scanner
+        withSonarQubeEnv("${SONARQUBE_SERVER}") {
+          script {
+            docker.image('sonarsource/sonar-scanner-cli:7.0.1.5153').inside('-u root:root') {
+              sh '''
+                echo "🔍 Running SonarQube analysis..."
+                sonar-scanner \
+                  -Dsonar.projectKey=chat-frontend \
+                  -Dsonar.projectName="Chat Frontend" \
+                  -Dsonar.sources=. \
+                  -Dsonar.projectVersion=${GIT_SHORT} \
+                  -Dsonar.host.url=$SONAR_HOST_URL
+              '''
+            }
+          }
         }
       }
     }
-
-
 
     stage('Build Docker Image') {
       steps {
