@@ -14,13 +14,7 @@ pipeline {
     REMOTE_HOST = '35.188.81.254'
     REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as'
 
-    // 🔹 Thêm biến để Jenkins biết dùng SonarQube server nào
-    SONARQUBE_SERVER = 'sonarqube' // phải trùng tên bạn config trong Manage Jenkins > System
-  }
-
-  tools {
-    // 🔹 Cần có sonar-scanner (bạn phải cài plugin SonarQube Scanner trước)
-    sonarQubeScanner 'sonar-scanner'
+    SONARQUBE_SERVER = 'SonarQube' // tên bạn config trong Manage Jenkins > System
   }
 
   stages {
@@ -34,7 +28,7 @@ pipeline {
       }
     }
 
-    // 🧩 Thêm stage SonarQube ở đây
+    // 🧩 Thêm bước phân tích SonarQube
     stage('Code Analysis - SonarQube') {
       steps {
         withSonarQubeEnv("${SONARQUBE_SERVER}") {
