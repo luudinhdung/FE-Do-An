@@ -1,6 +1,7 @@
 pipeline {
   agent {
     docker {
+      // Image có sẵn Docker CLI, mount Docker socket để Jenkins dùng Docker ngoài host
       image 'docker:27.0.3-cli'
       args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
     }
@@ -13,8 +14,7 @@ pipeline {
     REMOTE_USER = 'dinhtuanzzzaa'
     REMOTE_HOST = '35.188.81.254'
     REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as'
-
-    SONARQUBE_SERVER = 'SonarQube' // tên bạn config trong Manage Jenkins > System
+    SONARQUBE_SERVER = 'SonarQube'
   }
 
   stages {
@@ -27,11 +27,10 @@ pipeline {
         }
       }
     }
-
-    // 🧩 Thêm bước phân tích SonarQube
-    stage('Code Analysis - SonarQube') {
+  
+    stage('SonarQube Analysis') {
       steps {
-        withSonarQubeEnv("${SONARQUBE_SERVER}") {
+        withSonarQubeEnv(SONARQUBE_SERVER) {
           sh '''
             echo "🔍 Running SonarQube analysis..."
             sonar-scanner \
@@ -44,6 +43,8 @@ pipeline {
         }
       }
     }
+
+
 
     stage('Build Docker Image') {
       steps {
