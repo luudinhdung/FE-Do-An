@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      // Image có sẵn Docker CLI, mount Docker socket để Jenkins dùng Docker ngoài host
+      // Dùng image Docker CLI để build + mount socket
       image 'docker:27.0.3-cli'
       args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
     }
@@ -30,21 +30,18 @@ pipeline {
 
     stage('SonarQube Analysis') {
       steps {
-        // Chạy SonarQube scan bên trong container có sẵn sonar-scanner
-        withSonarQubeEnv("${SONARQUBE_SERVER}") {
-          script {
-            docker.image('sonarsource/sonar-scanner-cli:7.0.1.5153').inside('-u root:root') {
-              sh '''
-                echo "🔍 Running SonarQube analysis..."
-                sonar-scanner \
-                  -Dsonar.projectKey=chat-frontend \
-                  -Dsonar.projectName="Chat Frontend" \
-                  -Dsonar.sources=. \
-                  -Dsonar.projectVersion=${GIT_SHORT} \
-                  -Dsonar.host.url=$SONAR_HOST_URL
-              '''
-            }
-          }
+        withSonarQubeEnv(SONARQUBE_SERVER) {
+          sh '''
+            echo "🔍 Running SonarQube analysis..."
+            docker run --rm -v $(pwd):/usr/src \
+              sonarsource/sonar-scanner-cli:latest \
+              -Dsonar.projectKey=chat-frontend \
+              -Dsonar.projectName="Chat Frontend" \
+              -Dsonar.sources=. \
+              -Dsonar.projectVersion=${GIT_SHORT} \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_AUTH_TOKEN
+          '''
         }
       }
     }
