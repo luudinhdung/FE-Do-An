@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import io from "socket.io-client";
 import FeedbackButton from "../Feedback/FeedbackButton";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 const socket = io(`${API_URL}/messages`);
 

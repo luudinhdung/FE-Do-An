@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 interface FeedbackFormProps {
   onClose: () => void;
 }
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function FeedbackForm({ onClose }: FeedbackFormProps) {
   const [user, setUser] = useState<any>(null); // lưu user từ API

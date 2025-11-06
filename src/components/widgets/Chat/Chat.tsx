@@ -29,7 +29,7 @@ interface MessageProps {
   setChatGroups: React.Dispatch<React.SetStateAction<ChatGroup[]>>;
   participants: { user: { id: string; name: string; avatar: string } }[];
 }
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 interface Message {
   [x: string]: any;

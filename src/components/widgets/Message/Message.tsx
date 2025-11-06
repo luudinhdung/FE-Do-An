@@ -17,7 +17,7 @@ import { KeyInputModal } from "./features/KeyInputModal";
 import { SearchBox } from "./features/SearchBox";
 import { SearchResults } from "./features/SearchResults";
 import { UserHeader } from "./features/UserHeader";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 interface ChatGroup {
   id: string;

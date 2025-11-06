@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 function SecuritySettings() {
   const [countdown, setCountdown] = useState<number>(30);
   const { t } = useTranslation();
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
   useEffect(() => {
     // Lấy defaultCountdown từ API current user

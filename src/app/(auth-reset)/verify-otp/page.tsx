@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 export default function Page() {
   const {
     register,
@@ -29,7 +29,7 @@ export default function Page() {
 
   const handleSubmitForm = handleSubmit(async (data) => {
   try {
-    const res = await fetch("http://localhost:3002/auth/verify-otp", {
+    const res = await fetch(`${API_URL}/auth/verify-otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

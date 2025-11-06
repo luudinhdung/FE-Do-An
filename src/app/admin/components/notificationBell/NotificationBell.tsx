@@ -3,7 +3,7 @@
 import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 const socket = io(API_URL);
 

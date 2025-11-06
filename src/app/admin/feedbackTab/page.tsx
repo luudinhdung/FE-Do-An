@@ -17,7 +17,7 @@ export default function FeedbackTab() {
   const [loading, setLoading] = useState(true);
   const [selectedFeedbackIndex, setSelectedFeedbackIndex] = useState<number | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://35.188.81.254";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
