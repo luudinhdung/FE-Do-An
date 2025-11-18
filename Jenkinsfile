@@ -28,23 +28,6 @@ pipeline {
       }
     }
 
-    stage('SonarQube Analysis') {
-      steps {
-        withSonarQubeEnv(SONARQUBE_SERVER) {
-          sh '''
-            echo "🔍 Running SonarQube analysis..."
-            docker run --rm -v $(pwd):/usr/src \
-              sonarsource/sonar-scanner-cli:latest \
-              -Dsonar.projectKey=chat-frontend \
-              -Dsonar.projectName="Chat Frontend" \
-              -Dsonar.sources=. \
-              -Dsonar.projectVersion=${GIT_SHORT} \
-              -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_AUTH_TOKEN
-          '''
-        }
-      }
-    }
 
     stage('Build Docker Image') {
       steps {
