@@ -1,7 +1,6 @@
 pipeline {
   agent {
     docker {
-      // Dùng image Docker CLI để build + mount socket
       image 'docker:27.0.3-cli'
       args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
     }
@@ -14,10 +13,14 @@ pipeline {
     REMOTE_USER = 'dinhtuanzzzaa'
     REMOTE_HOST = '35.188.81.254'
     REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as'
-    SONARQUBE_SERVER = 'SonarQube'
   }
 
   stages {
+    stage('Prepare') {
+      steps {
+        sh 'git config --global --add safe.directory /var/jenkins_home/workspace/fe-pipeline'
+      }
+    }
 
     stage('Checkout') {
       steps {
@@ -28,10 +31,9 @@ pipeline {
       }
     }
 
-
     stage('Build Docker Image') {
       steps {
-        sh "docker build --no-cache -t ${IMAGE}:latest ."
+        sh "docker build --no-cache --pull -t ${IMAGE}:latest ."
       }
     }
 
@@ -39,7 +41,6 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh '''
-            echo "🚀 Pushing image to Docker Hub..."
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
             docker push ${IMAGE}:latest
           '''
