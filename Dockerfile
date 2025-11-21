@@ -2,24 +2,30 @@
 # 1️⃣ Build phase
 # =====================
 FROM node:18-alpine AS builder
+
+# Set working directory
 WORKDIR /app
 
 # Copy package files để tận dụng cache
 COPY package*.json ./
 
-# Cache thư mục npm để không tải lại dependency mỗi lần build
-RUN --mount=type=cache,target=/root/.npm npm ci
+# Update npm lên version mới để tránh conflict
+RUN npm install -g npm@11
+
+# Cài dependencies, bỏ cache mount nếu gây lỗi
+RUN npm ci
 
 # Copy toàn bộ source code
 COPY . .
 
-# Build Next.js (tạo folder .next)
+# Build Next.js
 RUN npm run build
 
 # =====================
 # 2️⃣ Run phase
 # =====================
 FROM node:18-alpine AS runner
+
 WORKDIR /app
 
 ENV NODE_ENV=production
