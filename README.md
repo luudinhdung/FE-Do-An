@@ -10,7 +10,7 @@ npm run dev
 yarn dev
 # or
 pnpm dev123123
-# or123
+# or12312312
 bun dev123
 ```
 123
