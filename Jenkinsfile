@@ -33,7 +33,12 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh "docker build --no-cache --pull -t ${IMAGE}:latest ."
+        sh """
+          docker build --no-cache --pull \
+            --build-arg NEXT_PUBLIC_API_URL=https://chat-as.site \
+            --build-arg NEXT_PUBLIC_ENCRYPTION_KEY=my-secret-system-key \
+            -t ${IMAGE}:latest .
+        """
       }
     }
 
