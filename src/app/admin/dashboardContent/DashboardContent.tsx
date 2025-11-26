@@ -11,7 +11,9 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-
+import { useEffect, useState } from "react";
+import axios from "axios";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 function DashboardContent() {
   type StatColor = "blue" | "green" | "purple" | "orange";
   type StatsCard = {
@@ -24,10 +26,11 @@ function DashboardContent() {
     description: string;
   };
 
-  const statsCards: StatsCard[] = [
+  // 👉 Chuyển từ mảng tĩnh sang state để update real-time
+  const [statsCards, setStatsCards] = useState<StatsCard[]>([
     {
       title: "Tổng số Users",
-      value: "2,847",
+      value: "0",
       change: "+12.5%",
       changeType: "increase",
       color: "blue",
@@ -61,8 +64,37 @@ function DashboardContent() {
       icon: Activity,
       description: "Uptime server",
     },
-  ];
+  ]);
 
+  // 👉 Gọi API lấy danh sách user
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const [usersRes, roomsRes,feedbackRes] = await Promise.all([
+        axios.get(`${API_URL}/users/non-admin`),
+        axios.get(`${API_URL}/chats/rooms`),
+        axios.get(`${API_URL}/feedback`)
+      ]);
+
+      const userCount = usersRes.data.length;
+      const roomCount = roomsRes.data.length;
+      const feedbackCount = feedbackRes.data.data.length;
+        
+      // cập nhật statsCards
+      setStatsCards((prev) => {
+        const updated = [...prev];
+        updated[0].value = userCount.toString();  // Tổng số user
+        updated[1].value = roomCount.toString(); 
+        updated[2].value = feedbackCount.toString(); // Tổng feedback
+        return updated;
+      });
+    } catch (error) {
+      console.error("Lỗi khi load stats:", error);
+    }
+  };
+
+  fetchStats();
+}, []);
   const recentActivities = [
     {
       user: "Nguyễn Văn A",
@@ -164,7 +196,7 @@ function DashboardContent() {
                   <Shield className="w-6 h-6" />
                 </div>
                 <h1 className="text-3xl font-bold">
-                  Chào mừng đến với Admin Astranony!
+                  Chào mừng đến với Admin!
                 </h1>
               </div>
               <p className="text-blue-100 text-lg">

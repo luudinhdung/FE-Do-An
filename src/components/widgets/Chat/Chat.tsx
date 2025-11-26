@@ -108,7 +108,8 @@ function Chat({
     ? CryptoJS.AES.decrypt(chatKey, key).toString(CryptoJS.enc.Utf8)
     : null;
   const { t } = useTranslation();
-
+  console.log(messages.length);
+  
   // Xử lý thời gian
   useEffect(() => {
     const timer = setInterval(() => {
@@ -196,16 +197,14 @@ function Chat({
 
     fetchCurrentUser();
   }, []);
-  useEffect(() => {
-    if (currentUserName && currentUserId && messages.length > 0) {
-      const timeout = setTimeout(() => {
-        setIsReady(true);
-      }, 250); // 250ms để đảm bảo layout ổn định
-      return () => clearTimeout(timeout);
-    } else {
-      setIsReady(false); // reset nếu mất dữ liệu
-    }
-  }, [currentUserName, currentUserId, messages]);
+useEffect(() => {
+  if (currentUserName && currentUserId) {
+    const timeout = setTimeout(() => {
+      setIsReady(true);
+    }, 250);
+    return () => clearTimeout(timeout);
+  }
+}, [currentUserName, currentUserId]);
   // Xử lý xoá message
   const handleDeleteMessage = async (messageId: string) => {
     try {
@@ -1249,7 +1248,7 @@ function Chat({
                                 <span className="text-base">
                                   {msg.reactions?.find(
                                     (r) => r.userId === currentUserId
-                                  )?.emoji || "❤️"}
+                                  )?.emoji || "♡"}
                                 </span>
                               </div>
 

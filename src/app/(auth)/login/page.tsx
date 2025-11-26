@@ -17,12 +17,16 @@ import axios from "axios";
 const Animate = dynamic(() => import("@/components/icons/Animate/Animate"), {
   ssr: false,
 });
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 type FormData = SchemaLogin;
 
 function Page() {
   const { handleLogin } = useContext(AppContext);
   const [showPassword, setShowPassword] = useState(false);
+
+  // ⭐ POPUP LOADING
+  const [isChecking, setIsChecking] = useState(false);
+
   const router = useRouter();
 
   const {
@@ -33,20 +37,19 @@ function Page() {
     resolver: yupResolver(schemaLogin),
   });
 
-  // ✅ Hàm xử lý login
+  // ⭐ Hàm xử lý login
   const handleLoginClick = async (data: FormData, e?: React.BaseSyntheticEvent) => {
-    if (e) e.preventDefault(); // ⛔ Chặn reload khi submit hoặc nhấn Enter
+    if (e) e.preventDefault();
+
+    setIsChecking(true); // ⭐ Bật loading popup
 
     try {
-      console.log("🚀 Gửi request login:", data);
-
       const response = await axios.post(`${API_URL}/auth/login`, data, {
         withCredentials: true,
       });
 
-      console.log("✅ Login success:", response.data);
-
       const { accessToken, user } = response.data;
+
       if (!accessToken) {
         toast.error("Phản hồi không hợp lệ từ server");
         return;
@@ -56,10 +59,13 @@ function Page() {
       toast.success("Đăng nhập thành công");
 
       sessionStorage.setItem("user_role", user.role);
-      router.push(user.role === "ADMIN" ? path.admin : path.home);
-    } catch (error: any) {
-      console.error("❌ Login error:", error);
 
+      // ⭐ Redirect sau khi login thành công
+      setTimeout(() => {
+        router.push(user.role === "ADMIN" ? path.admin : path.home);
+      }, 300);
+
+    } catch (error: any) {
       const msg = error.response?.data?.message;
 
       if (msg === "Invalid password" || msg === "Sai mật khẩu") {
@@ -69,11 +75,23 @@ function Page() {
       } else {
         toast.error(msg || "Đăng nhập thất bại, vui lòng thử lại");
       }
+    } finally {
+      setIsChecking(false); // ⭐ Tắt loading popup khi xong
     }
   };
 
   return (
     <div className="">
+      {/* ⭐ POPUP LOADING */}
+      {isChecking && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+          <div className="bg-white px-8 py-6 rounded-xl shadow-lg flex flex-col items-center">
+            <div className="w-10 h-10 border-4 border-gray-300 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-700 font-medium">Đang đăng nhập...</p>
+          </div>
+        </div>
+      )}
+
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-5 py-12 lg:pr-10 items-center h-[100vh]">
           <div className="hidden lg:block lg:col-span-3">
@@ -85,15 +103,10 @@ function Page() {
               <span className="text-[#6358DC]">Chào mừng </span>bạn quay trở lại
             </h2>
 
-            <form
-              className="mt-5"
-              onSubmit={handleSubmit(handleLoginClick)}
-            >
-                <InputAuth
+            <form className="mt-5" onSubmit={handleSubmit(handleLoginClick)}>
+              <InputAuth
                 classNameWrap={`overflow-hidden flex w-full text-[16px] outline-none border border-solid border-[#B3B3B3] rounded-[8px] focus:border-[#4F46E5] focus:shadow-sm h-[45px] ${
-                  errors.identifier
-                    ? `border-[#FF3B30] focus:border-[#FF3B30]`
-                    : `border-[#B3B3B3] focus:border-[#4F46E5]`
+                  errors.identifier ? `border-[#FF3B30]` : `border-[#B3B3B3]`
                 }`}
                 classNameInput="pl-3 py-3 flex-1 border-none outline-none placeholder:text-[#666666]"
                 classNameShow="ml-auto px-3 h-full"
@@ -105,12 +118,10 @@ function Page() {
                 errorMessage={errors.identifier?.message}
               />
 
-            <InputAuth
+              <InputAuth
                 className="mt-2"
                 classNameWrap={`overflow-hidden flex w-full text-[16px] outline-none border border-solid border-[#B3B3B3] rounded-[8px] focus:border-[#4F46E5] focus:shadow-sm h-[45px] ${
-                  errors.password
-                    ? `border-[#FF3B30] focus:border-[#FF3B30]`
-                    : `border-[#B3B3B3] focus:border-[#4F46E5]`
+                  errors.password ? `border-[#FF3B30]` : `border-[#B3B3B3]`
                 }`}
                 classNameInput="pl-3 py-3 flex-1 border-none outline-none placeholder:text-[#666666]"
                 classNameShow="ml-auto px-3 h-full"

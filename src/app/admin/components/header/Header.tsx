@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { userApi } from "@/apis/user.api";
 import Image from "next/image";
-import logoAstra from "../../../../../public/imgs/logo-astra.png";
+import logoAstra from "../../../../../public/imgs/chat.png";
 import { Menu, Search } from "lucide-react";
 import { IconSidebarLogoutAdmin } from "@/data/icons";
 

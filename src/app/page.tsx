@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ToastContainer } from "react-toastify";
-import logoAstra from "../../public/imgs/logo-astra.png";
+import logoAstra from "../../public/imgs/chat.png";
 
 function Home() {
   const { t } = useTranslation();
