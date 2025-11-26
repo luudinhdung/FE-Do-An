@@ -8,27 +8,14 @@ pipeline {
     REMOTE_USER = 'dinhtuanzzzaa'
     REMOTE_HOST = '35.188.81.254'
     REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as'
+    PATH = "/usr/bin:/bin:${env.PATH}" // ← thêm dòng này
   }
 
   stages {
-    stage('Prepare') {
-      steps {
-        sh 'git config --global --add safe.directory /var/jenkins_home/workspace/fe-pipeline'
-      }
-    }
-
-    stage('Checkout') {
-      steps {
-        checkout scm
-        script {
-          env.GIT_SHORT = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
-        }
-      }
-    }
-
     stage('Build Docker Image') {
       steps {
         sh """
+          docker --version   # test Docker
           docker build --no-cache --pull \
             --build-arg NEXT_PUBLIC_API_URL=https://chat-as.site \
             --build-arg NEXT_PUBLIC_ENCRYPTION_KEY=my-secret-system-key \
