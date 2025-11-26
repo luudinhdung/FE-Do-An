@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'docker:27.0.3-cli'
-      args '-v /var/run/docker.sock:/var/run/docker.sock -v /home/jenkins/.docker:/root/.docker'
-    }
-  } 
+  agent any
 
   environment {
     IMAGE = 'dungsave123/chat-frontend'
