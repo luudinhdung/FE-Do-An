@@ -1,20 +1,15 @@
 pipeline {
-
   options { skipDefaultCheckout() }
 
-  agent any  // agent bất kỳ cho Checkout
+  agent any
 
   environment {
     IMAGE = 'dungsave123/chat-frontend'
     DOCKER_CRED = 'dockerhub-cred'
     SSH_CRED = 'gcp-ssh-key'
-    REMOTE_USER = 'dinhtuanzzzaa'
-    REMOTE_HOST = '35.188.81.254'
-    REMOTE_PROJECT_DIR = '/home/dinhtuanzzzaa/chat-as'
   }
 
   stages {
-
     stage('Checkout') {
       steps {
         checkout([
@@ -25,8 +20,7 @@ pipeline {
           ]]
         ])
         script {
-          GIT_SHORT = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
-          env.IMAGE_TAG = "${GIT_SHORT}"
+          env.IMAGE_TAG = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
         }
       }
     }
@@ -38,19 +32,14 @@ pipeline {
           args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:$WORKSPACE -w $WORKSPACE'
         }
       }
-
       steps {
         sh '''
           apk add --no-cache nodejs npm
           npm ci
           npm run build
 
-          docker build \
-            --no-cache \
-            --build-arg NEXT_PUBLIC_API_URL=https://chat-as.site \
-            --build-arg NEXT_PUBLIC_ENCRYPTION_KEY=my-secret-system-key \
-            -t ${IMAGE}:${IMAGE_TAG} .
-
+          docker build -t ${IMAGE}:${IMAGE_TAG} .
+          
           echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
           docker push ${IMAGE}:${IMAGE_TAG}
           docker tag ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
@@ -63,8 +52,8 @@ pipeline {
       steps {
         sshagent([SSH_CRED]) {
           sh """
-            ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
-              cd ${REMOTE_PROJECT_DIR} &&
+            ssh -o StrictHostKeyChecking=no user@host '
+              cd /home/user/chat-as &&
               docker compose pull frontend || true &&
               docker compose up -d --force-recreate frontend
             '
@@ -72,10 +61,5 @@ pipeline {
         }
       }
     }
-  }
-
-  post {
-    success { echo "✅ FE deployed successfully: ${IMAGE}:${IMAGE_TAG}" }
-    failure { echo "❌ FE Pipeline failed." }
   }
 }
