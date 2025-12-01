@@ -1,7 +1,9 @@
 pipeline {
 
-  /* 🚨 BẮT BUỘC: Tắt checkout mặc định để tránh lỗi fatal: not in a git directory */
-
+  /* 🚨 Tắt checkout mặc định của Jenkins để tránh conflict */
+  options {
+    skipDefaultCheckout()
+  }
 
   agent {
     docker {
@@ -26,7 +28,6 @@ pipeline {
       steps {
         sh 'git config --global --add safe.directory $WORKSPACE'
 
-        // Checkout repo FE (không dùng scm mặc định của Jenkins)
         checkout([
           $class: 'GitSCM',
           branches: [[name: '*/main']],
@@ -50,7 +51,7 @@ pipeline {
     stage('Install Dependencies') {
       steps {
         sh '''
-          echo "📦 Installing Node.js 20 (for FE build)..."
+          echo "📦 Installing Node.js 20..."
           apk add --no-cache nodejs npm
           node -v
           npm -v
