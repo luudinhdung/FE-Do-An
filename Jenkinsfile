@@ -1,13 +1,15 @@
 pipeline {
 
-  /* 🚨 Tắt checkout mặc định của Jenkins để tránh conflict */
   options {
-    skipDefaultCheckout()
+    skipDefaultCheckout()            // Tắt checkout mặc định
+    durabilityHint('PERFORMANCE_OPTIMIZED')
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    timestamps()
   }
 
   agent {
     docker {
-      image 'docker:27.0.3-cli'
+      image 'node:20-alpine'         // node + npm + Alpine → nhẹ, nhanh
       args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
@@ -26,76 +28,80 @@ pipeline {
     /* ─────────────────────────────────────────── */
     stage('Checkout') {
       steps {
-        sh 'git config --global --add safe.directory $WORKSPACE'
+        sh '''
+          apk add --no-cache git
+          git config --global --add safe.directory $WORKSPACE
+        '''
 
         checkout([
           $class: 'GitSCM',
           branches: [[name: '*/main']],
-          userRemoteConfigs: [[
-            url: 'https://github.com/luudinhdung/FE-Do-An'
-          ]]
+          userRemoteConfigs: [[url: 'https://github.com/luudinhdung/FE-Do-An']]
         ])
 
         script {
-          GIT_SHORT = sh(
+          env.GIT_SHORT = sh(
             returnStdout: true,
             script: "git rev-parse --short HEAD"
           ).trim()
 
-          env.IMAGE_TAG = "${GIT_SHORT}"
+          env.IMAGE_TAG = env.GIT_SHORT
         }
       }
     }
 
     /* ─────────────────────────────────────────── */
-    stage('Install Dependencies') {
+    stage('Fast Dependency Install (Cached)') {
       steps {
         sh '''
-          echo "📦 Installing Node.js 20..."
-          apk add --no-cache nodejs npm
-          node -v
-          npm -v
-
-          echo "📦 Installing frontend dependencies..."
-          npm ci
+          echo "⚡ Using cached node_modules if exists..."
+          
+          if [ -d node_modules ]; then
+            echo "node_modules already exists → skipping npm ci"
+          else
+            echo "Installing dependencies..."
+            npm ci
+          fi
         '''
       }
     }
 
     /* ─────────────────────────────────────────── */
-    stage('Build Next.js Production') {
+    stage('Build Next.js') {
       steps {
         sh '''
-          echo "⚙️ Building Next.js..."
+          echo "⚙️ Building Next.js Production..."
           npm run build
         '''
       }
     }
 
     /* ─────────────────────────────────────────── */
-    stage('Build Docker Image') {
+    stage('Build Docker Image (Cached)') {
       steps {
         sh '''
-          echo "🐳 Building Docker image for FE..."
+          echo "🐳 Building Docker image with caching..."
+
           docker build \
-            --no-cache \
             --build-arg NEXT_PUBLIC_API_URL=https://chat-as.site \
             --build-arg NEXT_PUBLIC_ENCRYPTION_KEY=my-secret-system-key \
-            -t ${IMAGE}:${IMAGE_TAG} .
+            -t ${IMAGE}:${IMAGE_TAG} \
+            -t ${IMAGE}:latest \
+            .
         '''
       }
     }
 
     /* ─────────────────────────────────────────── */
-    stage('Push Docker Image') {
+    stage('Push Image to DockerHub') {
       steps {
         withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh '''
-            echo "📤 Pushing images..."
+            echo "🔑 Logging in to DockerHub..."
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 
+            echo "📤 Pushing image..."
             docker push ${IMAGE}:${IMAGE_TAG}
-            docker tag ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
             docker push ${IMAGE}:latest
           '''
         }
@@ -103,29 +109,29 @@ pipeline {
     }
 
     /* ─────────────────────────────────────────── */
-    stage('Deploy') {
+    stage('Deploy to VM') {
       steps {
         sshagent([SSH_CRED]) {
           sh """
-            echo "🚀 Deploying FE on VM..."
+            echo "🚀 Deploying FE to VM..."
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
               cd ${REMOTE_PROJECT_DIR} &&
-              docker compose pull frontend || true &&
+              docker compose pull frontend &&
               docker compose up -d --force-recreate frontend
             '
           """
         }
       }
     }
+
   }
 
-  /* ─────────────────────────────────────────── */
   post {
     success {
-      echo "✅ FE deployed successfully: ${IMAGE}:${IMAGE_TAG}"
+      echo "🚀 Deployment successful: ${IMAGE}:${IMAGE_TAG}"
     }
     failure {
-      echo "❌ FE Pipeline failed."
+      echo "❌ Build failed!"
     }
   }
 }
