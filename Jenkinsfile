@@ -1,18 +1,8 @@
 pipeline {
 
-  options {
-    skipDefaultCheckout()            // Tắt checkout mặc định
-    durabilityHint('PERFORMANCE_OPTIMIZED')
-    buildDiscarder(logRotator(numToKeepStr: '10'))
-    timestamps()
-  }
+  options { skipDefaultCheckout() }
 
-  agent {
-    docker {
-      image 'node:20-alpine'         // node + npm + Alpine → nhẹ, nhanh
-      args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
-    }
-  }
+  agent any  // agent bất kỳ cho Checkout
 
   environment {
     IMAGE = 'dungsave123/chat-frontend'
@@ -25,113 +15,67 @@ pipeline {
 
   stages {
 
-    /* ─────────────────────────────────────────── */
     stage('Checkout') {
       steps {
-        sh '''
-          apk add --no-cache git
-          git config --global --add safe.directory $WORKSPACE
-        '''
-
         checkout([
           $class: 'GitSCM',
           branches: [[name: '*/main']],
-          userRemoteConfigs: [[url: 'https://github.com/luudinhdung/FE-Do-An']]
+          userRemoteConfigs: [[
+            url: 'https://github.com/luudinhdung/FE-Do-An'
+          ]]
         ])
-
         script {
-          env.GIT_SHORT = sh(
-            returnStdout: true,
-            script: "git rev-parse --short HEAD"
-          ).trim()
-
-          env.IMAGE_TAG = env.GIT_SHORT
+          GIT_SHORT = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
+          env.IMAGE_TAG = "${GIT_SHORT}"
         }
       }
     }
 
-    /* ─────────────────────────────────────────── */
-    stage('Fast Dependency Install (Cached)') {
-      steps {
-        sh '''
-          echo "⚡ Using cached node_modules if exists..."
-          
-          if [ -d node_modules ]; then
-            echo "node_modules already exists → skipping npm ci"
-          else
-            echo "Installing dependencies..."
-            npm ci
-          fi
-        '''
+    stage('Build & Deploy') {
+      agent {
+        docker {
+          image 'docker:27.0.3-cli'
+          args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:$WORKSPACE -w $WORKSPACE'
+        }
       }
-    }
 
-    /* ─────────────────────────────────────────── */
-    stage('Build Next.js') {
       steps {
         sh '''
-          echo "⚙️ Building Next.js Production..."
+          apk add --no-cache nodejs npm
+          npm ci
           npm run build
-        '''
-      }
-    }
-
-    /* ─────────────────────────────────────────── */
-    stage('Build Docker Image (Cached)') {
-      steps {
-        sh '''
-          echo "🐳 Building Docker image with caching..."
 
           docker build \
+            --no-cache \
             --build-arg NEXT_PUBLIC_API_URL=https://chat-as.site \
             --build-arg NEXT_PUBLIC_ENCRYPTION_KEY=my-secret-system-key \
-            -t ${IMAGE}:${IMAGE_TAG} \
-            -t ${IMAGE}:latest \
-            .
+            -t ${IMAGE}:${IMAGE_TAG} .
+
+          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+          docker push ${IMAGE}:${IMAGE_TAG}
+          docker tag ${IMAGE}:${IMAGE_TAG} ${IMAGE}:latest
+          docker push ${IMAGE}:latest
         '''
       }
     }
 
-    /* ─────────────────────────────────────────── */
-    stage('Push Image to DockerHub') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
-            echo "🔑 Logging in to DockerHub..."
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-
-            echo "📤 Pushing image..."
-            docker push ${IMAGE}:${IMAGE_TAG}
-            docker push ${IMAGE}:latest
-          '''
-        }
-      }
-    }
-
-    /* ─────────────────────────────────────────── */
-    stage('Deploy to VM') {
+    stage('Deploy') {
       steps {
         sshagent([SSH_CRED]) {
           sh """
-            echo "🚀 Deploying FE to VM..."
             ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
               cd ${REMOTE_PROJECT_DIR} &&
-              docker compose pull frontend &&
+              docker compose pull frontend || true &&
               docker compose up -d --force-recreate frontend
             '
           """
         }
       }
     }
-
   }
 
   post {
-    success {
-      echo "🚀 Deployment successful: ${IMAGE}:${IMAGE_TAG}"
-    }
-    failure {
-      echo "❌ Build failed!"
-    }
+    success { echo "✅ FE deployed successfully: ${IMAGE}:${IMAGE_TAG}" }
+    failure { echo "❌ FE Pipeline failed." }
   }
 }
