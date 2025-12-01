@@ -1,9 +1,7 @@
 pipeline {
 
   /* 🚨 BẮT BUỘC: Tắt checkout mặc định để tránh lỗi fatal: not in a git directory */
-  options {
-    skipDefaultCheckout(true)
-  }
+
 
   agent {
     docker {
