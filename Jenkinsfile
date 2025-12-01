@@ -1,4 +1,10 @@
 pipeline {
+
+  /* 🚨 BẮT BUỘC: Tắt checkout mặc định để tránh lỗi fatal: not in a git directory */
+  options {
+    skipDefaultCheckout(true)
+  }
+
   agent {
     docker {
       image 'docker:27.0.3-cli'
@@ -21,7 +27,15 @@ pipeline {
     stage('Checkout') {
       steps {
         sh 'git config --global --add safe.directory $WORKSPACE'
-        checkout scm
+
+        // Checkout repo FE (không dùng scm mặc định của Jenkins)
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: '*/main']],
+          userRemoteConfigs: [[
+            url: 'https://github.com/luudinhdung/FE-Do-An'
+          ]]
+        ])
 
         script {
           GIT_SHORT = sh(
