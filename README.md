@@ -11,7 +11,7 @@ yarn dev
 # or
 pnpm dev123123123123123123
 # or12312312123123s12321
-bun dev123
+bun dev12312332
 ```
 123
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.1
