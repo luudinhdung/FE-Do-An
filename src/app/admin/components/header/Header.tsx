@@ -59,7 +59,7 @@ export default function Header() {
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Astranony</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Chat-Admin</h1>
                 <p className="text-gray-500 hidden sm:block">
                   Quản lý hệ thống và theo dõi hoạt động
                 </p>
