@@ -34,7 +34,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         sh """
-          docker build --no-cache --pull \
+          docker build --pull \
             --build-arg NEXT_PUBLIC_API_URL=https://chat-as.site \
             --build-arg NEXT_PUBLIC_ENCRYPTION_KEY=my-secret-system-key \
             -t ${IMAGE}:latest .
@@ -61,7 +61,7 @@ pipeline {
               cd ${REMOTE_PROJECT_DIR} &&
               docker compose down &&
               docker compose pull frontend &&
-              docker compose up -d --force-recreate frontend
+              docker compose up -d --force-recreate
             '
           """
         }

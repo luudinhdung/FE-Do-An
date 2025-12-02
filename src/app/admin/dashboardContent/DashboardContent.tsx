@@ -196,7 +196,7 @@ useEffect(() => {
                   <Shield className="w-6 h-6" />
                 </div>
                 <h1 className="text-3xl font-bold">
-                  Chào mừng đến với Admin!
+                  Chào mừng đến với Admin123!
                 </h1>
               </div>
               <p className="text-blue-100 text-lg">
